@@ -1,0 +1,30 @@
+== instalando dependências
+== rodando os testes
+................................................                         [100%]
+
+---------- coverage: platform darwin, python 3.13.9-final-0 ----------
+Name                           Stmts   Miss  Cover   Missing
+------------------------------------------------------------
+app/__init__.py                    0      0   100%
+app/cli.py                        28     28     0%   7-42
+app/config.py                      7      0   100%
+app/db.py                         18      2    89%   12, 16
+app/ingestao/__init__.py           0      0   100%
+app/ingestao/gravacao.py          98      2    98%   52, 164
+app/ingestao/servico.py           58      4    93%   38, 40, 89, 109
+app/ingestao/smartreport.py      268     21    92%   149, 171, 178-179, 190, 216, 219-220, 228-229, 235, 254, 268, 297, 315, 330, 345, 363, 386, 435, 437
+app/ingestao/validacao.py         30      0   100%
+app/main.py                       21      2    90%   17-18
+app/repositories/__init__.py       0      0   100%
+app/repositories/operacao.py      58      3    95%   19, 97, 115
+app/routers/__init__.py            0      0   100%
+app/routers/importacoes.py        22      2    91%   22-23
+app/routers/indicadores.py        32      4    88%   34-35, 49-50
+app/schemas.py                    92      0   100%
+app/services/__init__.py           0      0   100%
+app/services/indicadores.py       46      0   100%
+app/services/periodo.py           16      0   100%
+------------------------------------------------------------
+TOTAL                            794     68    91%
+
+48 passed in 1.24s
