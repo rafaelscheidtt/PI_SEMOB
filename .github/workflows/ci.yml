@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+jobs:
+  backend:
+    name: API (pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: pip install -r requirements.txt
+      - run: pytest --cov=app --cov-report=term-missing --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-backend
+          path: backend/coverage.xml
+
+  frontend:
+    name: App (flutter test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test --coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cobertura-frontend
+          path: frontend/coverage/lcov.info
