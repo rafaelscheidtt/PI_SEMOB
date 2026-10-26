@@ -22,6 +22,24 @@ O app só conversa com a API, e só a API acessa o banco.
 
 ## Como rodar
 
+### Atalhos (Mac e Windows)
+
+Na pasta `atalhos/` tem os mesmos atalhos em duas versões: `atalhos/mac/` (arquivos `.command`)
+e `atalhos/windows/` (arquivos `.bat`). É só clicar duas vezes no da sua máquina:
+
+| Atalho | O que faz |
+|--------|-----------|
+| `1 - rodar testes` | roda os testes da API e do app |
+| `2 - subir API` | prepara o Python e sobe a API em http://localhost:8000/docs (deixe a janela aberta) |
+| `3 - abrir app` | abre o app no navegador, com a API já rodando |
+| `4 - importar relatorios` | importa os relatórios de `dados/semob` (só quando chegarem relatórios novos) |
+
+Na primeira vez, o `2 - subir API` cria o `backend/.env` e abre ele para colar a `MONGODB_URL`
+do Atlas, que a gente passa no privado. Precisa ter Python 3.12 e Flutter instalados. No Mac, se
+aparecer aviso de desenvolvedor não identificado, clique com o botão direito no atalho e em Abrir.
+
+Se preferir o terminal, os passos são estes:
+
 ### API
 
 Precisa de um MongoDB. A gente usa o Atlas (a string de conexão vai no `.env`); quem
