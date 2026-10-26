@@ -26,6 +26,3 @@ frontend/macos/Pods/
 .vscode/
 *.iml
 .DS_Store
-
-# Atalhos locais de execução (macOS)
-*.command
