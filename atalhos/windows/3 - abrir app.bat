@@ -1,32 +1,42 @@
 @echo off
-rem DashMOB - atalho para Windows: compila o app e abre no navegador. Antes, deixe o "2 - subir API" rodando.
+rem DashMOB - atalho para Windows: abre o app. Antes, deixe o "2 - subir API" rodando.
 setlocal
 cd /d "%~dp0..\..\frontend"
 where flutter >nul 2>nul
 if errorlevel 1 goto sem_flutter
 
-rem usa o Python do back-end (criado pelo "2 - subir API") para servir o app
-set "PY=..\backend\.venv\Scripts\python.exe"
-if not exist "%PY%" (
-  where py >nul 2>nul
-  if not errorlevel 1 (set "PY=py -3") else (set "PY=python")
-)
-
 echo == baixando os pacotes do app
 call flutter pub get
 if errorlevel 1 goto erro
 
-echo == compilando o app, leva cerca de 1 minuto
-call flutter build web --release --dart-define=API_URL=http://localhost:8000
-if errorlevel 1 goto erro
-
 echo.
-echo == DashMOB em http://localhost:8080  (feche esta janela para encerrar)
+echo == abrindo o app no Chrome, a primeira vez demora um pouco
+echo == Para parar: tecle q nesta janela
 echo.
-start "" /min cmd /c "timeout /t 3 /nobreak >nul && start http://localhost:8080"
-%PY% -m http.server 8080 --bind 127.0.0.1 --directory build\web
+call flutter run -d chrome --dart-define=API_URL=http://localhost:8000
+if errorlevel 1 (
+  echo.
+  echo == nao deu no Chrome, tentando no Edge
+  call flutter run -d edge --dart-define=API_URL=http://localhost:8000
+)
 pause
 exit /b 0
+
+:configurar_env
+echo.
+echo Falta configurar o banco. Vai abrir o arquivo backend\.env no Bloco de Notas:
+echo troque a primeira linha pela MONGODB_URL que o Guilherme mandou, salve,
+echo feche o Bloco de Notas e rode este atalho de novo.
+notepad ".env"
+pause
+exit /b 1
+
+:sem_python
+echo.
+echo Nao achei o Python. Instale o Python 3.12 pelo python.org e marque a opcao
+echo "Add python.exe to PATH" na instalacao. Depois rode este atalho de novo.
+pause
+exit /b 1
 
 :sem_flutter
 echo.
