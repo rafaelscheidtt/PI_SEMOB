@@ -56,6 +56,18 @@ def test_us05_resumo_por_linha_e_ocorrencias(client, pacote):
     assert len(oc) == 1 and oc[0]["linha"] == "02" and oc[0]["inicio_realizado"] is None
 
 
+def test_us03_detalhes_por_turno_e_faixa_horaria_na_api(client, pacote):
+    _enviar(client, pacote)
+    r = client.get("/indicadores/detalhes", params={"inicio": "2026-09-01", "fim": "2026-09-30"})
+    assert r.status_code == 200
+    corpo = r.json()
+    assert [t["turno"] for t in corpo["turnos"]] == ["manha", "tarde", "noite"]
+    assert corpo["pico"]["faixa"] in {f["faixa"] for f in corpo["faixas_horarias"]}
+    por_linha = client.get("/indicadores/detalhes", params={"inicio": "2026-09-01", "fim": "2026-09-30", "linha": "02"}).json()
+    assert por_linha["linha"] == "02" and por_linha["turnos"] == [] and por_linha["faixas_horarias"]
+    assert client.get("/indicadores/detalhes", params={"inicio": "2026-09-20", "fim": "2026-09-10"}).status_code == 400
+
+
 def test_comparativo_na_api(client, pacote):
     _enviar(client, pacote)
     r = client.get("/indicadores", params={"inicio": "2026-09-10", "fim": "2026-09-13", "granularidade": "dia", "comparar": "true"})

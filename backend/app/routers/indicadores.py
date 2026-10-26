@@ -5,8 +5,8 @@ from pymongo.database import Database
 
 from app.db import get_db
 from app.repositories.operacao import listar_linhas, listar_ocorrencias, resumo_por_linha
-from app.schemas import Linha, Ocorrencia, RespostaIndicadores, ResumoLinha
-from app.services.indicadores import obter_indicadores
+from app.schemas import DetalhesOperacao, Linha, Ocorrencia, RespostaIndicadores, ResumoLinha
+from app.services.indicadores import detalhar_operacao, obter_indicadores
 from app.services.periodo import validar_intervalo
 
 router = APIRouter(tags=["indicadores"])
@@ -34,6 +34,15 @@ def indicadores_por_linha(inicio: date, fim: date, db: Database = Depends(get_db
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return resumo_por_linha(db, inicio, fim)
+
+
+@router.get("/indicadores/detalhes", response_model=DetalhesOperacao)
+def detalhes_da_operacao(inicio: date, fim: date, linha: str | None = None, db: Database = Depends(get_db)):
+    """Cumprimento por turno (só do sistema) e viagens por faixa horária (sistema ou linha)."""
+    try:
+        return detalhar_operacao(db, inicio, fim, linha)
+    except ValueError as exc:  # RN07
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/ocorrencias", response_model=list[Ocorrencia])

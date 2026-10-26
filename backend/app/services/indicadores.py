@@ -9,7 +9,7 @@ from datetime import date, timedelta
 
 from pymongo.database import Database
 
-from app.repositories.operacao import agregar_linha, agregar_sistema
+from app.repositories.operacao import agregar_linha, agregar_sistema, fcv_por_turno, viagens_por_faixa_horaria
 from app.services.periodo import validar_intervalo
 
 
@@ -96,3 +96,13 @@ def obter_indicadores(db: Database, inicio: date, fim: date, granularidade: str,
         if serie_ant:
             resposta["anterior"] = {"inicio": ini_ant, "fim": fim_ant, "totais": _totais(serie_ant)}
     return resposta
+
+
+def detalhar_operacao(db: Database, inicio: date, fim: date, linha: str | None = None) -> dict:
+    """Cumprimento por turno e viagens por faixa horária, para os painéis de detalhe."""
+    validar_intervalo(inicio, fim)  # RN07
+    turnos = [] if linha else [{**t, "fcv": _fcv(t["realizadas"], t["programadas"])} for t in fcv_por_turno(db, inicio, fim)]
+    faixas = viagens_por_faixa_horaria(db, inicio, fim, linha)
+    pico = max(faixas, key=lambda f: f["viagens"]) if faixas else None
+    return {"linha": linha, "turnos": turnos, "faixas_horarias": faixas,
+            "pico": None if pico is None else {"faixa": pico["faixa"], "viagens": pico["viagens"]}}

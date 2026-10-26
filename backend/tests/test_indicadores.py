@@ -4,7 +4,7 @@ from datetime import date
 import pytest
 
 from app.ingestao.servico import importar_pacote
-from app.services.indicadores import obter_indicadores, periodo_anterior
+from app.services.indicadores import detalhar_operacao, obter_indicadores, periodo_anterior
 
 
 @pytest.fixture
@@ -93,3 +93,30 @@ def test_rn03_media_por_viagem_usa_so_dias_com_bilhetagem(db, pacote):
     viagens_com_bilhetagem = sum(
         d["viagens_realizadas"] for d in db.operacao_diaria.find({"passageiros.total": {"$exists": True}}))
     assert t["media_passageiros_por_viagem"] == pytest.approx(t["passageiros_total"] / viagens_com_bilhetagem, abs=0.01)
+
+
+def test_us03_cumprimento_por_turno(db_carregado):
+    r = detalhar_operacao(db_carregado, date(2026, 9, 7), date(2026, 9, 13))
+    assert [t["turno"] for t in r["turnos"]] == ["manha", "tarde", "noite"]
+    t = obter_indicadores(db_carregado, date(2026, 9, 7), date(2026, 9, 13), "mes")["totais"]
+    assert sum(x["programadas"] for x in r["turnos"]) == t["viagens_programadas"]
+    assert sum(x["realizadas"] for x in r["turnos"]) == t["viagens_realizadas"]
+    for x in r["turnos"]:
+        assert x["fcv"] == pytest.approx(x["realizadas"] / x["programadas"] * 100, abs=0.01)  # RN08
+
+
+def test_us03_viagens_por_faixa_horaria_do_sistema_e_da_linha(db_carregado):
+    sistema = detalhar_operacao(db_carregado, date(2026, 9, 7), date(2026, 9, 13))
+    faixas = sistema["faixas_horarias"]
+    assert faixas and [f["faixa"] for f in faixas] == sorted(f["faixa"] for f in faixas)
+    assert sistema["pico"]["viagens"] == max(f["viagens"] for f in faixas)
+    linha = detalhar_operacao(db_carregado, date(2026, 9, 7), date(2026, 9, 13), linha="02")
+    assert linha["turnos"] == []  # o FCV por turno só existe para o sistema inteiro
+    assert linha["faixas_horarias"] and sum(f["viagens"] for f in linha["faixas_horarias"]) < sum(f["viagens"] for f in faixas)
+
+
+def test_detalhes_sem_dados_e_intervalo_invertido(db_carregado):
+    r = detalhar_operacao(db_carregado, date(2026, 10, 1), date(2026, 10, 31))
+    assert r["turnos"] == [] and r["faixas_horarias"] == [] and r["pico"] is None
+    with pytest.raises(ValueError):
+        detalhar_operacao(db_carregado, date(2026, 9, 13), date(2026, 9, 7))

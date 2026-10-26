@@ -107,6 +107,45 @@ def resumo_por_linha(db: Database, inicio: date, fim: date) -> list[dict]:
     return saida
 
 
+TURNOS = ("manha", "tarde", "noite")
+
+
+def fcv_por_turno(db: Database, inicio: date, fim: date) -> list[dict]:
+    """Viagens programadas e realizadas por turno (manhã, tarde e noite) no intervalo.
+
+    O relatório de FCV só existe para o sistema inteiro, por isso não há versão por linha.
+    """
+    soma = {t: {"programadas": 0, "realizadas": 0} for t in TURNOS}
+    for d in db.operacao_diaria.find({**_filtro_datas(inicio, fim), "turnos": {"$exists": True}}):
+        for t in TURNOS:
+            v = (d.get("turnos") or {}).get(t) or {}
+            soma[t]["programadas"] += v.get("programadas") or 0
+            soma[t]["realizadas"] += v.get("realizadas") or 0
+    return [{"turno": t, **soma[t]} for t in TURNOS if soma[t]["programadas"] or soma[t]["realizadas"]]
+
+
+def viagens_por_faixa_horaria(db: Database, inicio: date, fim: date, linha_codigo: str | None = None) -> list[dict]:
+    """Soma das viagens por hora de início no intervalo, do sistema ou de uma linha."""
+    if linha_codigo:
+        linha_id = _linha_id(db, linha_codigo)
+        if linha_id is None:
+            return []
+        docs = db.operacao_linha_diaria.find({**_filtro_datas(inicio, fim), "linha_id": linha_id,
+                                              "faixas_horarias": {"$exists": True}})
+    else:
+        docs = db.operacao_diaria.find({**_filtro_datas(inicio, fim), "faixas_horarias": {"$exists": True}})
+    acumulado: dict[int, dict] = {}
+    for d in docs:
+        for f in d.get("faixas_horarias") or []:
+            faixa = f.get("faixa")
+            if faixa is None:
+                continue
+            item = acumulado.setdefault(faixa, {"faixa": faixa, "viagens": 0, "veiculos": 0})
+            item["viagens"] += f.get("viagens") or 0
+            item["veiculos"] = max(item["veiculos"], f.get("veiculos") or 0)
+    return [acumulado[k] for k in sorted(acumulado)]
+
+
 def listar_ocorrencias(db: Database, inicio: date, fim: date, linha_codigo: str | None = None, tipo: str | None = None) -> list[dict]:
     filtro = _filtro_datas(inicio, fim)
     if linha_codigo:

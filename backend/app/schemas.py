@@ -50,6 +50,31 @@ class RespostaIndicadores(BaseModel):
     anterior: PeriodoAnterior | None = None
 
 
+class Turno(BaseModel):
+    turno: str
+    programadas: int
+    realizadas: int
+    fcv: float | None
+
+
+class FaixaHoraria(BaseModel):
+    faixa: int
+    viagens: int
+    veiculos: int
+
+
+class Pico(BaseModel):
+    faixa: int
+    viagens: int
+
+
+class DetalhesOperacao(BaseModel):
+    linha: str | None
+    turnos: list[Turno]
+    faixas_horarias: list[FaixaHoraria]
+    pico: Pico | None
+
+
 class ResumoLinha(BaseModel):
     codigo: str
     nome: str
