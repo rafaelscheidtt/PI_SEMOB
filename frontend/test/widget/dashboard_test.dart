@@ -15,7 +15,7 @@ class RepositorioFalso implements IndicadoresRepository {
   String? ultimaLinha;
 
   @override
-  Future<Indicadores> obter({required DateTime inicio, required DateTime fim, required Granularidade granularidade, String? linha}) async {
+  Future<Indicadores> obter({required DateTime inicio, required DateTime fim, required Granularidade granularidade, String? linha, bool comparar = false}) async {
     ultimaGranularidade = granularidade;
     ultimaLinha = linha;
     return resposta;
@@ -23,6 +23,21 @@ class RepositorioFalso implements IndicadoresRepository {
 
   @override
   Future<List<Linha>> linhas() async => const [Linha(codigo: '01', nome: 'B. Santa Maria'), Linha(codigo: '02', nome: 'Circular Gerty')];
+
+  @override
+  Future<List<ResumoLinha>> resumoPorLinha({required DateTime inicio, required DateTime fim}) async => const [];
+
+  @override
+  Future<List<Ocorrencia>> ocorrencias({required DateTime inicio, required DateTime fim, String? linha, TipoOcorrencia? tipo}) async => const [];
+
+  @override
+  Future<DetalhesOperacao> detalhes({required DateTime inicio, required DateTime fim, String? linha}) async => DetalhesOperacao.vazio;
+
+  @override
+  Future<List<Importacao>> importacoes() async => const [];
+
+  @override
+  Future<ResultadoImportacao> importar(List<ArquivoEnvio> arquivos) async => throw UnimplementedError();
 }
 
 const _comDados = Indicadores(
