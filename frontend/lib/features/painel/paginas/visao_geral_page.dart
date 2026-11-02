@@ -286,7 +286,7 @@ class _VisaoGeralPageState extends State<VisaoGeralPage> {
 
 /// Cartão do cumprimento de viagens: percentual do período, por turno e os piores dias.
 class _CartaoCumprimento extends StatelessWidget {
-  const _CartaoCumprimento({super.key, required this.totais, required this.turnos, required this.serie, required this.granularidade});
+  const _CartaoCumprimento({required this.totais, required this.turnos, required this.serie, required this.granularidade});
 
   final Totais totais;
   final List<Turno> turnos;
@@ -342,7 +342,7 @@ class _CartaoCumprimento extends StatelessWidget {
 }
 
 class _LinhaTurno extends StatelessWidget {
-  const _LinhaTurno(this.turno, {super.key});
+  const _LinhaTurno(this.turno);
 
   final Turno turno;
 

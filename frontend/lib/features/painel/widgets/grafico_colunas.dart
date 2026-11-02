@@ -147,7 +147,7 @@ class LegendaSeries extends StatelessWidget {
           Row(mainAxisSize: MainAxisSize.min, children: [
             Container(width: 9, height: 9, decoration: BoxDecoration(color: s.cor, shape: BoxShape.circle)),
             const SizedBox(width: 5),
-            Text(s.nome, style: const TextStyle(fontSize: 12, color: Cores.texto2)),
+            Flexible(child: Text(s.nome, style: const TextStyle(fontSize: 12, color: Cores.texto2), overflow: TextOverflow.ellipsis)),
           ]),
       ],
     );

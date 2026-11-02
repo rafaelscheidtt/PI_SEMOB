@@ -5,7 +5,7 @@ class Cores {
   Cores._();
 
   static const navy = Color(0xFF181949);
-  static const navyClaro = Color(0xFF232560);
+  static const navyClaro = Color(0xFF283474); // azul do brasão da Prefeitura
   static const fundo = Color(0xFFF5F6FA);
   static const linha = Color(0xFFE6E8EF);
   static const tinta = Color(0xFF1B1F2E);

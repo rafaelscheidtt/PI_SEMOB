@@ -99,6 +99,7 @@ motorista que aparece nos relatórios de ocorrência não é gravado no banco.
 | `GET /importacoes` | histórico de importações |
 | `GET /indicadores` | série e totais do período (`inicio`, `fim`, `granularidade`, `linha`, `comparar`) |
 | `GET /indicadores/linhas` | km, viagens e ocorrências por linha |
+| `GET /indicadores/detalhes` | cumprimento por turno e viagens por faixa horária (`inicio`, `fim`, `linha`) |
 | `GET /ocorrencias` | lista de ocorrências de viagem |
 | `GET /linhas` | linhas cadastradas |
 

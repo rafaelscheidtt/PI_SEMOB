@@ -48,10 +48,15 @@ class KpiCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            Expanded(child: Rotulo(titulo)),
-            if (etiquetaVariacao != null) ...[const SizedBox(width: 6), etiquetaVariacao],
-          ]),
+          LayoutBuilder(builder: (context, c) {
+            return Row(children: [
+              Expanded(child: Rotulo(titulo)),
+              if (etiquetaVariacao != null) ...[
+                const SizedBox(width: 6),
+                ConstrainedBox(constraints: BoxConstraints(maxWidth: (c.maxWidth - 46).clamp(0.0, c.maxWidth)), child: etiquetaVariacao),
+              ],
+            ]);
+          }),
           const SizedBox(height: 6),
           if (valor == null)
             Text('Sem dados', key: Key('kpi-$titulo'), style: tema.titleMedium?.copyWith(color: Cores.texto2))

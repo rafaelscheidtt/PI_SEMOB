@@ -18,13 +18,21 @@ if errorlevel 1 goto erro
 
 echo == compilando o app, leva cerca de 1 minuto
 call flutter build web --release --dart-define=API_URL=http://localhost:8000
-if errorlevel 1 goto erro
+if errorlevel 1 goto plano_b
 
 echo.
 echo == DashMOB em http://localhost:8080  (feche esta janela para encerrar)
 echo.
 start "" /min cmd /c "timeout /t 3 /nobreak >nul && start http://localhost:8080"
 %PY% -m http.server 8080 --bind 127.0.0.1 --directory build\web
+pause
+exit /b 0
+
+:plano_b
+echo.
+echo == a compilacao falhou; tentando servir direto pelo Flutter
+echo == abra http://localhost:8080 no navegador quando aparecer "is being served"
+call flutter run -d web-server --web-port 8080 --dart-define=API_URL=http://localhost:8000
 pause
 exit /b 0
 
