@@ -7,6 +7,7 @@ import '../../data/indicadores_repository.dart';
 import '../../data/models.dart';
 import 'paginas/cumprimento_page.dart';
 import 'paginas/em_construcao_page.dart';
+import 'paginas/linhas_page.dart';
 import 'paginas/passageiros_page.dart';
 import 'paginas/visao_geral_page.dart';
 import 'telas.dart';
@@ -73,7 +74,17 @@ class _PainelShellState extends State<PainelShell> {
       case Tela.passageiros:
         return PassageirosPage(key: const ValueKey('tela-passageiros'), filtros: _filtros, repository: widget.repository);
       case Tela.linhas:
-        return EmConstrucaoPage(key: const ValueKey('tela-linhas'), tela: _tela, detalhe: _linhaAberta == null ? null : 'Linha $_linhaAberta');
+        return LinhasPage(
+          key: const ValueKey('tela-linhas'),
+          filtros: _filtros,
+          repository: widget.repository,
+          linhaAberta: _linhaAberta,
+          onAbrirLinha: (codigo) => setState(() => _linhaAberta = codigo),
+          onVoltar: () => setState(() {
+            _linhaAberta = null;
+            _filtros = _filtros.copyWith(limparLinha: true);
+          }),
+        );
       case Tela.importacao:
       case Tela.financeiro:
       case Tela.alertas:

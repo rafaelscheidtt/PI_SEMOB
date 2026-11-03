@@ -110,6 +110,7 @@ void main() {
     await tester.tap(find.byKey(const Key('linha-02')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('tela-linhas')), findsOneWidget);
+    expect(find.text('Linha 02 — Circular Gerty'), findsOneWidget);
   });
 
   testWidgets('menu não abre as telas previstas para a Sprint 2', (tester) async {
