@@ -72,6 +72,21 @@ flutter pub get
 flutter run -d chrome --dart-define=API_URL=http://localhost:8000
 ```
 
+## Telas
+
+O app segue o protótipo do Figma: menu lateral, barra de filtros (intervalo, visão diária/semanal/mensal
+e linha) e as telas abaixo. Os filtros valem para todas as telas.
+
+| Tela | O que mostra |
+|------|--------------|
+| Visão Geral | km, viagens, passageiros e gratuidades com a variação em relação ao período anterior, pagantes × gratuidades, cumprimento por turno, viagens por faixa horária e a tabela de monitoramento por linha |
+| Linhas | a mesma tabela com busca e, ao clicar, o detalhamento da linha: indicadores, faixa horária e ocorrências de viagem |
+| Cumprimento de viagens | FCV do período, por turno e ao longo do tempo, com os períodos em que faltaram mais viagens |
+| Passageiros | pagantes, gratuidades, total e média por viagem (sempre do sistema inteiro) |
+| Importação de relatórios | envio do pacote (HTML ou .zip) e histórico do que já foi importado |
+
+Financeiro, Alertas e Relatórios aparecem no menu marcadas como Sprint 2.
+
 ## Relatórios importados
 
 Cada arquivo é reconhecido pelo título do relatório.
