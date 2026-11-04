@@ -11,3 +11,9 @@ Funcionalidade: Quilometragem por período
     Quando o gestor seleciona o mês de outubro de 2026
     Então o cartão de quilometragem exibe "Sem dados"
     E nenhum valor zero é exibido
+
+  Cenário: Comparar com o período anterior
+    Dado que existem registros de operação em julho e em agosto de 2026
+    Quando o gestor seleciona o mês de agosto de 2026
+    Então o cartão de quilometragem exibe a variação percentual em relação a julho, como "+4,9% vs. jul."
+    E a variação fica verde quando a quilometragem subiu e vermelha quando caiu

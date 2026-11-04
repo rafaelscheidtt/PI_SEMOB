@@ -10,8 +10,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class RepositorioFalso implements IndicadoresRepository {
-  RepositorioFalso(this.resposta);
+  RepositorioFalso(this.resposta, {this.historico = const [], this.resultadoImportacao});
   final Indicadores resposta;
+  final List<Importacao> historico;
+  final ResultadoImportacao? resultadoImportacao;
+  List<ArquivoEnvio>? arquivosEnviados;
   Granularidade? ultimaGranularidade;
   String? ultimaLinha;
   bool? ultimoComparar;
@@ -51,10 +54,15 @@ class RepositorioFalso implements IndicadoresRepository {
       );
 
   @override
-  Future<List<Importacao>> importacoes() async => const [];
+  Future<List<Importacao>> importacoes() async => historico;
 
   @override
-  Future<ResultadoImportacao> importar(List<ArquivoEnvio> arquivos) async => throw UnimplementedError();
+  Future<ResultadoImportacao> importar(List<ArquivoEnvio> arquivos) async {
+    arquivosEnviados = arquivos;
+    final r = resultadoImportacao;
+    if (r == null) throw ErroApi('Não foi possível importar os arquivos');
+    return r;
+  }
 }
 
 const comDados = Indicadores(

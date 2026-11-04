@@ -7,6 +7,7 @@ import '../../data/indicadores_repository.dart';
 import '../../data/models.dart';
 import 'paginas/cumprimento_page.dart';
 import 'paginas/em_construcao_page.dart';
+import 'paginas/importacao_page.dart';
 import 'paginas/linhas_page.dart';
 import 'paginas/passageiros_page.dart';
 import 'paginas/visao_geral_page.dart';
@@ -86,6 +87,7 @@ class _PainelShellState extends State<PainelShell> {
           }),
         );
       case Tela.importacao:
+        return ImportacaoPage(key: const ValueKey('tela-importacao'), repository: widget.repository);
       case Tela.financeiro:
       case Tela.alertas:
       case Tela.relatorios:

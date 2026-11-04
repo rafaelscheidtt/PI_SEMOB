@@ -16,3 +16,9 @@ Funcionalidade: Filtros do painel
     Quando ele informa a data inicial 20/08/2026 e a data final 10/08/2026
     Então o painel exibe a mensagem "A data inicial deve ser anterior ou igual à final"
     E os indicadores não são atualizados
+
+  Cenário: Abrir o detalhamento de uma linha
+    Dado que o gestor está na tela "Linhas"
+    Quando ele clica na linha "02" da tabela de monitoramento
+    Então o painel exibe o detalhamento da linha "02", com viagens, quilometragem, participação na oferta e ocorrências
+    E as ocorrências de viagem da linha no período, com dia, tipo, sentido, tabela e horários
