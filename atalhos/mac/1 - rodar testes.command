@@ -7,12 +7,18 @@ for d in "$HOME/Documents/develop/flutter/bin" "$HOME/development/flutter/bin" "
 done
 fechar() { echo; read -n 1 -s -r -p "Pressione qualquer tecla para fechar..."; exit "${1:-0}"; }
 
-# Roda os testes da API e do app.
-bash scripts/setup_backend.sh testes
+# Roda os testes da API e do app. A saída também fica em saida_testes.txt (na raiz do projeto),
+# pra colar no grupo quando alguma coisa quebrar.
+{
+  echo "== $(date)"
+  bash scripts/setup_backend.sh testes
+  echo
+  if command -v flutter >/dev/null; then
+    bash scripts/bootstrap_frontend.sh
+  else
+    echo "Flutter não encontrado: os testes do app ficaram de fora (instale pelo docs.flutter.dev)."
+  fi
+} 2>&1 | tee saida_testes.txt
 echo
-if command -v flutter >/dev/null; then
-  bash scripts/bootstrap_frontend.sh
-else
-  echo "Flutter não encontrado: os testes do app ficaram de fora (instale pelo docs.flutter.dev)."
-fi
+echo "Saída salva em saida_testes.txt"
 fechar

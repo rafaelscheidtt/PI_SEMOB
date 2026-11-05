@@ -1,11 +1,11 @@
 {
-    "name": "dashmob",
-    "short_name": "dashmob",
+    "name": "DashMOB - SEMOB São Caetano do Sul",
+    "short_name": "DashMOB",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F5F6FA",
+    "theme_color": "#181949",
+    "description": "Painel de operação do transporte municipal de São Caetano do Sul.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -17,17 +17,24 @@ python -m pip install -q --upgrade pip
 python -m pip install -q -r requirements.txt
 if errorlevel 1 goto erro
 
+set "LOG=%~dp0..\..\saida_testes.txt"
+echo == %date% %time% > "%LOG%"
 echo.
-echo == testes da API
-python -m pytest --cov=app
+echo == rodando os testes da API e do app, aguarde (a saida aparece no fim e fica em saida_testes.txt)
+echo == pytest >> "%LOG%"
+python -m pytest --cov=app >> "%LOG%" 2>&1
 echo.
 cd /d "%~dp0..\..\frontend"
 where flutter >nul 2>nul
 if errorlevel 1 goto sem_flutter
-echo == testes do app
-call flutter pub get
-call flutter test
+call flutter pub get >> "%LOG%" 2>&1
+echo == analyze >> "%LOG%"
+call flutter analyze >> "%LOG%" 2>&1
+echo == flutter test >> "%LOG%"
+call flutter test >> "%LOG%" 2>&1
+type "%LOG%"
 echo.
+echo Saida salva em saida_testes.txt
 pause
 exit /b 0
 

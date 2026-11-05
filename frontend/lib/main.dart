@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+import 'core/tema.dart';
 import 'data/indicadores_repository.dart';
-import 'features/dashboard/dashboard_page.dart';
+import 'features/painel/painel_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +20,7 @@ class DashMobApp extends StatelessWidget {
     return MaterialApp(
       title: 'DashMOB',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorSchemeSeed: const Color(0xFF1F5FA8), useMaterial3: true),
+      theme: temaDashMob(),
       locale: const Locale('pt', 'BR'),
       supportedLocales: const [Locale('pt', 'BR')],
       localizationsDelegates: const [
@@ -27,7 +28,7 @@ class DashMobApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: DashboardPage(repository: IndicadoresRepositoryHttp()),
+      home: PainelShell(repository: IndicadoresRepositoryHttp()),
     );
   }
 }

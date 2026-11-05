@@ -21,6 +21,9 @@ frontend/ios/Pods/
 frontend/ios/.symlinks/
 frontend/macos/Pods/
 
+# Saída dos atalhos de teste
+saida_testes.txt
+
 # IDE / SO
 .idea/
 .vscode/
