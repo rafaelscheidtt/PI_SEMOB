@@ -34,6 +34,10 @@ e `atalhos/windows/` (arquivos `.bat`). É só clicar duas vezes no da sua máqu
 | `3 - abrir app` | abre o app no navegador, com a API já rodando |
 | `4 - importar relatorios` | importa os relatórios de `dados/semob` (só quando chegarem relatórios novos) |
 
+Pra demonstrar, tem ainda a pasta `atalhos/um clique/` (também com `mac/` e `windows/`), que sobe a API
+e o app de uma vez: `abrir no navegador` abre o DashMOB no computador e `abrir no celular` mostra um
+QR code pra abrir no celular, que precisa estar na mesma rede Wi-Fi.
+
 Na primeira vez, o `2 - subir API` cria o `backend/.env` e abre ele para colar a `MONGODB_URL`
 do Atlas, que a gente passa no privado. Precisa ter Python 3.12 e Flutter instalados. No Mac, se
 aparecer aviso de desenvolvedor não identificado, clique com o botão direito no atalho e em Abrir.
@@ -55,6 +59,30 @@ uvicorn app.main:app --reload
 ```
 
 A documentação das rotas fica em http://localhost:8000/docs.
+
+### Login e usuários
+
+O painel pede login (US11). Ninguém se cadastra sozinho: o primeiro administrador é criado uma
+vez só, por quem sobe a API — ou pelo `.env` (`ADMIN_INICIAL_EMAIL` e `ADMIN_INICIAL_SENHA`,
+usados só se ainda não existir nenhum usuário) ou pela linha de comando:
+
+```bash
+python -m app.usuarios_cli criar-admin "Nome" email@semob.gov.br
+```
+
+Daí em diante é o administrador que cadastra os outros, na tela Usuários do app, escolhendo o
+papel de cada um:
+
+| Papel | O que enxerga |
+|-------|---------------|
+| administrador | tudo, mais a tela Usuários |
+| gestor | o painel completo e a importação de relatórios |
+| executivo | só a visão resumida: Visão Geral, Cumprimento de viagens e Passageiros |
+
+Como o banco do Atlas é um só pra todo o grupo, o administrador criado por uma pessoa vale pra
+todas. Com o token em mãos (resposta do `POST /login`), o botão Authorize do `/docs` libera as
+outras rotas. O segredo que assina os tokens e a validade da sessão ficam no `.env`
+(`TOKEN_SECRET`, `TOKEN_HORAS`).
 
 Para importar os relatórios (pasta, `.zip` ou arquivos `.html`):
 
@@ -83,7 +111,8 @@ e linha) e as telas abaixo. Os filtros valem para todas as telas.
 | Linhas | a mesma tabela com busca e, ao clicar, o detalhamento da linha: indicadores, faixa horária e ocorrências de viagem |
 | Cumprimento de viagens | FCV do período, por turno e ao longo do tempo, com os períodos em que faltaram mais viagens |
 | Passageiros | pagantes, gratuidades, total e média por viagem (sempre do sistema inteiro) |
-| Importação de relatórios | envio do pacote (HTML ou .zip) e histórico do que já foi importado |
+| Importação de relatórios | envio do pacote (HTML ou .zip) e histórico do que já foi importado (gestor e administrador) |
+| Usuários | cadastro, papel e desativação de usuários (só o administrador) |
 
 Financeiro, Alertas e Relatórios aparecem no menu marcadas como Sprint 2.
 
@@ -108,9 +137,14 @@ motorista que aparece nos relatórios de ocorrência não é gravado no banco.
 
 ## Rotas principais
 
+Fora `/login` e `/health`, todas pedem o cabeçalho `Authorization: Bearer <token>`.
+
 | Rota | Para que serve |
 |------|----------------|
-| `POST /importacoes` | importa um ou mais relatórios (ou o `.zip`) |
+| `POST /login` | e-mail e senha; devolve o token e o papel do usuário |
+| `GET /me` | usuário da sessão atual |
+| `GET /usuarios`, `POST /usuarios`, `PUT /usuarios/{id}` | cadastro de usuários (só administrador) |
+| `POST /importacoes` | importa um ou mais relatórios (ou o `.zip`); gestor e administrador |
 | `GET /importacoes` | histórico de importações |
 | `GET /indicadores` | série e totais do período (`inicio`, `fim`, `granularidade`, `linha`, `comparar`) |
 | `GET /indicadores/linhas` | km, viagens e ocorrências por linha |

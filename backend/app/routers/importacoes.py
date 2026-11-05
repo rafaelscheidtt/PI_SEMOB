@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from pymongo.database import Database
 
+from app.auth import exigir_papel
 from app.db import get_db
 from app.ingestao.servico import EXTENSOES_ACEITAS, importar_pacote
 from app.schemas import RespostaImportacao
@@ -9,7 +10,8 @@ router = APIRouter(tags=["importacoes"])
 
 
 @router.post("/importacoes", response_model=RespostaImportacao, status_code=201)
-async def criar_importacao(arquivos: list[UploadFile] = File(...), db: Database = Depends(get_db)):
+async def criar_importacao(arquivos: list[UploadFile] = File(...), db: Database = Depends(get_db),
+                           usuario: dict = Depends(exigir_papel("administrador", "gestor"))):
     """Recebe um ou mais relatórios HTML do Smart Report, ou o .zip do pacote."""
     entrada = []
     for arquivo in arquivos:
@@ -18,7 +20,7 @@ async def criar_importacao(arquivos: list[UploadFile] = File(...), db: Database 
             raise HTTPException(status_code=400, detail=f"Envie relatórios .html do Smart Report ou o pacote .zip ({nome})")
         entrada.append((nome, await arquivo.read()))
     try:
-        return importar_pacote(db, entrada)
+        return importar_pacote(db, entrada, usuario=usuario["email"])
     except Exception as exc:  # zip corrompido ou arquivo ilegível
         raise HTTPException(status_code=400, detail=f"Não foi possível ler os arquivos: {exc}") from exc
 

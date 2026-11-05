@@ -381,3 +381,49 @@ class ArquivoEnvio {
   final String nome;
   final List<int> bytes;
 }
+
+/// Papel do usuário (US11): define o que aparece no menu e o que a API permite.
+enum Papel {
+  administrador('administrador', 'Administrador', 'Tudo, mais o cadastro de usuários'),
+  gestor('gestor', 'Gestor', 'Painel completo e importação de relatórios'),
+  executivo('executivo', 'Executivo', 'Só a visão resumida: indicadores, cumprimento e passageiros');
+
+  const Papel(this.valorApi, this.rotulo, this.descricao);
+  final String valorApi;
+  final String rotulo;
+  final String descricao;
+
+  static Papel daApi(String? v) => values.firstWhere((p) => p.valorApi == v, orElse: () => executivo);
+}
+
+/// Usuário do painel (GET /me, GET /usuarios).
+class Usuario {
+  const Usuario({required this.id, required this.nome, required this.email, required this.papel, this.ativo = true});
+
+  final String id;
+  final String nome;
+  final String email;
+  final Papel papel;
+  final bool ativo;
+
+  factory Usuario.fromJson(Map<String, dynamic> j) => Usuario(
+        id: (j['_id'] ?? j['id'] ?? '') as String,
+        nome: (j['nome'] ?? '') as String,
+        email: (j['email'] ?? '') as String,
+        papel: Papel.daApi(j['papel'] as String?),
+        ativo: (j['ativo'] as bool?) ?? true,
+      );
+}
+
+/// Resposta do POST /login: o token que vai no cabeçalho das próximas chamadas e quem entrou.
+class Sessao {
+  const Sessao({required this.token, required this.usuario});
+
+  final String token;
+  final Usuario usuario;
+
+  factory Sessao.fromJson(Map<String, dynamic> j) => Sessao(
+        token: j['token'] as String,
+        usuario: Usuario.fromJson(j['usuario'] as Map<String, dynamic>),
+      );
+}

@@ -1,10 +1,13 @@
 // apoio dos testes de widget: repositório falso, dados de exemplo e a montagem do app
 import 'package:dashmob/core/filtros.dart';
 import 'package:dashmob/core/periodo.dart';
+import 'package:dashmob/core/sessao.dart';
+import 'package:dashmob/data/auth_repository.dart';
 import 'package:dashmob/data/indicadores_repository.dart';
 import 'package:dashmob/data/models.dart';
 import 'package:dashmob/features/painel/painel_shell.dart';
 import 'package:dashmob/features/painel/telas.dart';
+import 'package:dashmob/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -65,6 +68,54 @@ class RepositorioFalso implements IndicadoresRepository {
   }
 }
 
+/// Usuários de teste, um por papel (US11).
+const admin = Usuario(id: 'u1', nome: 'Ana Admin', email: 'admin@semob.teste', papel: Papel.administrador);
+const gestor = Usuario(id: 'u2', nome: 'Gil Gestor', email: 'gestor@semob.teste', papel: Papel.gestor);
+const executivo = Usuario(id: 'u3', nome: 'Eva Executiva', email: 'exec@semob.teste', papel: Papel.executivo);
+
+/// Login e cadastro falsos: aceita a senha "senha123" de qualquer usuário da lista.
+class AuthFalso implements AuthRepository {
+  AuthFalso({List<Usuario> usuarios = const [admin, gestor, executivo], this.sessaoGuardada}) : lista = List.of(usuarios);
+  final List<Usuario> lista;
+  Usuario? sessaoGuardada;
+  int logins = 0;
+
+  @override
+  Future<Sessao> login(String email, String senha) async {
+    logins++;
+    final u = lista.where((u) => u.email == email.trim() && u.ativo).toList();
+    if (u.isEmpty || senha != 'senha123') throw ErroApi('E-mail ou senha incorretos');
+    return Sessao(token: 'token-${u.first.id}', usuario: u.first);
+  }
+
+  @override
+  Future<Usuario> quemSou() async {
+    final u = sessaoGuardada;
+    if (u == null) throw ErroApi('Sessão inválida ou expirada, faça login de novo');
+    return u;
+  }
+
+  @override
+  Future<List<Usuario>> usuarios() async => List.of(lista);
+
+  @override
+  Future<Usuario> criarUsuario({required String nome, required String email, required String senha, required Papel papel}) async {
+    if (lista.any((u) => u.email == email)) throw ErroApi('já existe um usuário com este e-mail');
+    final novo = Usuario(id: 'u${lista.length + 1}', nome: nome, email: email, papel: papel);
+    lista.add(novo);
+    return novo;
+  }
+
+  @override
+  Future<Usuario> editarUsuario(String id, {String? nome, Papel? papel, bool? ativo, String? senha}) async {
+    final i = lista.indexWhere((u) => u.id == id);
+    final atual = lista[i];
+    final novo = Usuario(id: id, nome: nome ?? atual.nome, email: atual.email, papel: papel ?? atual.papel, ativo: ativo ?? atual.ativo);
+    lista[i] = novo;
+    return novo;
+  }
+}
+
 const comDados = Indicadores(
   semDados: false,
   serie: [
@@ -92,11 +143,29 @@ const porLinha = Indicadores(
 
 final filtrosPadrao = FiltrosPainel(inicio: DateTime(2026, 9, 1), fim: DateTime(2026, 9, 30));
 
-Widget app(IndicadoresRepository repo, {FiltrosPainel? filtros, Tela tela = Tela.visaoGeral}) => MaterialApp(
+const _localizacao = [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate];
+
+/// O painel já logado (por padrão como gestor), sem passar pela tela de login.
+Widget app(IndicadoresRepository repo, {FiltrosPainel? filtros, Tela tela = Tela.visaoGeral, Usuario usuario = gestor, AuthRepository? auth, VoidCallback? onSair}) => MaterialApp(
       locale: const Locale('pt', 'BR'),
       supportedLocales: const [Locale('pt', 'BR')],
-      localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
-      home: PainelShell(repository: repo, filtrosIniciais: filtros ?? filtrosPadrao, telaInicial: tela),
+      localizationsDelegates: _localizacao,
+      home: PainelShell(
+        repository: repo,
+        authRepository: auth ?? AuthFalso(),
+        usuario: usuario,
+        onSair: onSair ?? () {},
+        filtrosIniciais: filtros ?? filtrosPadrao,
+        telaInicial: tela,
+      ),
+    );
+
+/// O app inteiro, começando pela decisão login/painel (AppRaiz), como em produção.
+Widget appCompleto(IndicadoresRepository repo, AuthFalso auth, {String? tokenGuardado}) => MaterialApp(
+      locale: const Locale('pt', 'BR'),
+      supportedLocales: const [Locale('pt', 'BR')],
+      localizationsDelegates: _localizacao,
+      home: AppRaiz(key: UniqueKey(), sessao: SessaoAtual(), armazenamento: ArmazenamentoMemoria(tokenGuardado), auth: auth, repository: repo),
     );
 
 /// Define a largura da janela de teste (o layout usa LayoutBuilder, então MediaQuery não basta).

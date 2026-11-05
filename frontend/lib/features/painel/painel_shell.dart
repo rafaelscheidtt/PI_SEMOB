@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import '../../core/filtros.dart';
 import '../../core/layout.dart';
 import '../../core/tema.dart';
+import '../../data/auth_repository.dart';
 import '../../data/indicadores_repository.dart';
 import '../../data/models.dart';
+import '../usuarios/usuarios_page.dart';
 import 'paginas/cumprimento_page.dart';
 import 'paginas/em_construcao_page.dart';
 import 'paginas/importacao_page.dart';
@@ -16,11 +18,25 @@ import 'widgets/barra_filtros.dart';
 import 'widgets/menu_lateral.dart';
 
 /// Casca do painel: menu lateral, barra de filtros e a tela selecionada (US05, US06).
-/// Os filtros são um só para todas as telas, como no protótipo.
+/// Os filtros são um só para todas as telas, como no protótipo. O menu e as telas
+/// disponíveis dependem do papel do [usuario] logado (US11).
 class PainelShell extends StatefulWidget {
-  const PainelShell({super.key, required this.repository, this.filtrosIniciais, this.telaInicial = Tela.visaoGeral});
+  const PainelShell({
+    super.key,
+    required this.repository,
+    required this.usuario,
+    required this.onSair,
+    this.authRepository,
+    this.filtrosIniciais,
+    this.telaInicial = Tela.visaoGeral,
+  });
 
   final IndicadoresRepository repository;
+  final Usuario usuario;
+  final VoidCallback onSair;
+
+  /// Só o administrador precisa dele (tela Usuários).
+  final AuthRepository? authRepository;
   final FiltrosPainel? filtrosIniciais;
   final Tela telaInicial;
 
@@ -40,7 +56,7 @@ class _PainelShellState extends State<PainelShell> {
   void initState() {
     super.initState();
     _filtros = widget.filtrosIniciais ?? FiltrosPainel.padrao();
-    _tela = widget.telaInicial;
+    _tela = widget.telaInicial.permitidaPara(widget.usuario.papel) ? widget.telaInicial : Tela.visaoGeral;
     _carregarLinhas();
   }
 
@@ -54,7 +70,7 @@ class _PainelShellState extends State<PainelShell> {
   }
 
   void _irPara(Tela t, {String? linha}) {
-    if (!t.disponivel) return;
+    if (!t.disponivel || !t.permitidaPara(widget.usuario.papel)) return;
     setState(() {
       _tela = t;
       _linhaAberta = linha;
@@ -88,6 +104,8 @@ class _PainelShellState extends State<PainelShell> {
         );
       case Tela.importacao:
         return ImportacaoPage(key: const ValueKey('tela-importacao'), repository: widget.repository);
+      case Tela.usuarios:
+        return UsuariosPage(key: const ValueKey('tela-usuarios'), repository: widget.authRepository!, usuarioLogado: widget.usuario);
       case Tela.financeiro:
       case Tela.alertas:
       case Tela.relatorios:
@@ -99,17 +117,22 @@ class _PainelShellState extends State<PainelShell> {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, c) {
       final faixa = faixaDeLargura(c.maxWidth);
-      final menu = MenuLateral(selecionada: _tela, onSelecionar: (t) {
-        _irPara(t);
-        if (faixa != FaixaLargura.expandido) Navigator.of(context).maybePop();
-      });
+      final menu = MenuLateral(
+        selecionada: _tela,
+        usuario: widget.usuario,
+        onSair: widget.onSair,
+        onSelecionar: (t) {
+          _irPara(t);
+          if (faixa != FaixaLargura.expandido) Navigator.of(context).maybePop();
+        },
+      );
       final barra = BarraFiltros(
         filtros: _filtros,
         linhas: _linhas,
         compacto: faixa == FaixaLargura.compacto,
         onFiltros: (f) => setState(() => _filtros = f),
       );
-      final corpo = Column(children: [barra, Expanded(child: _conteudo())]);
+      final corpo = Column(children: [if (_tela != Tela.usuarios) barra, Expanded(child: _conteudo())]);
 
       if (faixa == FaixaLargura.expandido) {
         return Scaffold(body: Row(children: [menu, Expanded(child: corpo)]));

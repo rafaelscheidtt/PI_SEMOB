@@ -1,18 +1,33 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/tema.dart';
+import '../../../data/models.dart';
 import '../telas.dart';
 
-/// Menu lateral azul-escuro do protótipo: logo, grupos Operação e Gestão e o usuário.
+/// Menu lateral azul-escuro do protótipo: logo, grupos Operação, Gestão e Administração e o usuário.
+/// Só aparecem as telas que o papel do usuário pode ver (US11).
 class MenuLateral extends StatelessWidget {
-  const MenuLateral({super.key, required this.selecionada, required this.onSelecionar, this.largura = 256});
+  const MenuLateral({
+    super.key,
+    required this.selecionada,
+    required this.onSelecionar,
+    required this.usuario,
+    required this.onSair,
+    this.largura = 256,
+  });
 
   final Tela selecionada;
   final ValueChanged<Tela> onSelecionar;
+  final Usuario usuario;
+  final VoidCallback onSair;
   final double largura;
 
   @override
   Widget build(BuildContext context) {
+    final telas = Tela.permitidas(usuario.papel);
+    final operacao = telas.where((t) => !t.gestao && !t.administracao);
+    final gestao = telas.where((t) => t.gestao);
+    final administracao = telas.where((t) => t.administracao);
     return Container(
       width: largura,
       color: Cores.navy,
@@ -23,12 +38,19 @@ class MenuLateral extends StatelessWidget {
           const _Logo(),
           const SizedBox(height: 10),
           const _TituloGrupo('Operação'),
-          for (final t in Tela.values.where((t) => !t.gestao)) _ItemMenu(tela: t, ativo: t == selecionada, onTap: () => onSelecionar(t)),
-          const SizedBox(height: 12),
-          const _TituloGrupo('Gestão'),
-          for (final t in Tela.values.where((t) => t.gestao)) _ItemMenu(tela: t, ativo: false, onTap: null),
+          for (final t in operacao) _ItemMenu(tela: t, ativo: t == selecionada, onTap: () => onSelecionar(t)),
+          if (gestao.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            const _TituloGrupo('Gestão'),
+            for (final t in gestao) _ItemMenu(tela: t, ativo: false, onTap: null),
+          ],
+          if (administracao.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            const _TituloGrupo('Administração'),
+            for (final t in administracao) _ItemMenu(tela: t, ativo: t == selecionada, onTap: () => onSelecionar(t)),
+          ],
           const Spacer(),
-          const _Usuario(),
+          _Usuario(usuario: usuario, onSair: onSair),
         ],
       ),
     );
@@ -126,21 +148,32 @@ class _ItemMenu extends StatelessWidget {
 }
 
 class _Usuario extends StatelessWidget {
-  const _Usuario();
+  const _Usuario({required this.usuario, required this.onSair});
+
+  final Usuario usuario;
+  final VoidCallback onSair;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.only(top: 14),
       decoration: const BoxDecoration(border: Border(top: BorderSide(color: Cores.menuEtiqueta))),
-      child: const Row(children: [
-        CircleAvatar(radius: 16, backgroundColor: Cores.menuEtiqueta, child: Icon(Icons.person, size: 18, color: Cores.menuTexto)),
-        SizedBox(width: 10),
+      child: Row(children: [
+        const CircleAvatar(radius: 16, backgroundColor: Cores.menuEtiqueta, child: Icon(Icons.person, size: 18, color: Cores.menuTexto)),
+        const SizedBox(width: 10),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('Gestor SEMOB', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
-            Text('Secretaria de Mobilidade Urbana', style: TextStyle(color: Color(0xFF9EA2C7), fontSize: 11.5), maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(usuario.nome, key: const Key('menu-usuario-nome'), style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text('${usuario.papel.rotulo} · SEMOB', style: const TextStyle(color: Color(0xFF9EA2C7), fontSize: 11.5), maxLines: 1, overflow: TextOverflow.ellipsis),
           ]),
+        ),
+        IconButton(
+          key: const Key('menu-sair'),
+          tooltip: 'Sair',
+          onPressed: onSair,
+          icon: const Icon(Icons.logout, size: 18, color: Cores.menuTexto),
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
         ),
       ]),
     );
