@@ -109,7 +109,7 @@ class _ImportacaoPageState extends State<ImportacaoPage> {
                 border: Border.all(color: const Color(0xFFC7CBDA), width: 2),
               ),
               child: Column(children: [
-                const Icon(Icons.upload_file_outlined, size: 32, color: Cores.texto2),
+                Icon(Icons.upload_file_outlined, size: 32, color: Cores.texto2),
                 const SizedBox(height: 10),
                 Text('Escolha o .zip do pacote ou os arquivos HTML', style: Theme.of(context).textTheme.titleMedium, textAlign: TextAlign.center),
                 const SizedBox(height: 4),
@@ -123,9 +123,8 @@ class _ImportacaoPageState extends State<ImportacaoPage> {
                 FilledButton.icon(
                   key: const Key('botao-escolher-arquivos'),
                   onPressed: _enviando ? null : _importar,
-                  style: FilledButton.styleFrom(backgroundColor: Cores.navy),
                   icon: _enviando
-                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      ? SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Cores.sobreDestaque))
                       : const Icon(Icons.folder_open, size: 18),
                   label: Text(_enviando ? 'Importando...' : 'Escolher arquivos'),
                 ),
@@ -196,7 +195,7 @@ class _ResultadoCartao extends StatelessWidget {
               dataRowMinHeight: 40,
               dataRowMaxHeight: 44,
               dividerThickness: 0.6,
-              columns: const [
+              columns: [
                 DataColumn(label: Text('ARQUIVO', style: _TabelaHistorico.cabecalho)),
                 DataColumn(label: Text('RELATÓRIO', style: _TabelaHistorico.cabecalho)),
                 DataColumn(label: Text('REGISTROS', style: _TabelaHistorico.cabecalho), numeric: true),
@@ -224,8 +223,8 @@ class _TabelaHistorico extends StatelessWidget {
 
   final List<Importacao> historico;
 
-  static const cabecalho = TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 0.8, color: Cores.texto2);
-  static const celula = TextStyle(fontSize: 13, color: Cores.tinta);
+  static TextStyle get cabecalho => TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 0.8, color: Cores.texto2);
+  static TextStyle get celula => TextStyle(fontSize: 13, color: Cores.tinta);
 
   @override
   Widget build(BuildContext context) {
@@ -240,7 +239,7 @@ class _TabelaHistorico extends StatelessWidget {
         dataRowMinHeight: 42,
         dataRowMaxHeight: 46,
         dividerThickness: 0.6,
-        columns: const [
+        columns: [
           DataColumn(label: Text('DATA', style: cabecalho)),
           DataColumn(label: Text('ARQUIVO', style: cabecalho)),
           DataColumn(label: Text('RELATÓRIO', style: cabecalho)),

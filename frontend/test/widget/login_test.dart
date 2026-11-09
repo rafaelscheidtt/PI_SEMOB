@@ -86,7 +86,7 @@ void main() {
     expect(find.byKey(const Key('menu-importacao')), findsNothing);
     expect(find.byKey(const Key('menu-usuarios')), findsNothing);
     expect(find.byKey(const Key('menu-financeiro')), findsNothing);
-    expect(Tela.permitidas(Papel.executivo), [Tela.visaoGeral, Tela.cumprimento, Tela.passageiros]);
+    expect(Tela.permitidas(Papel.executivo), [Tela.visaoGeral, Tela.monitoramento, Tela.cumprimento, Tela.passageiros]);
   });
 
   testWidgets('US11 executivo não abre uma tela proibida nem pela tabela de linhas', (tester) async {

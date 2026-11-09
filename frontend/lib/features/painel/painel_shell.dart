@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../core/filtros.dart';
 import '../../core/layout.dart';
+import '../../core/periodo.dart';
 import '../../core/tema.dart';
+import '../../core/tema_controle.dart';
 import '../../data/auth_repository.dart';
 import '../../data/indicadores_repository.dart';
 import '../../data/models.dart';
@@ -11,6 +13,7 @@ import 'paginas/cumprimento_page.dart';
 import 'paginas/em_construcao_page.dart';
 import 'paginas/importacao_page.dart';
 import 'paginas/linhas_page.dart';
+import 'paginas/monitoramento_page.dart';
 import 'paginas/passageiros_page.dart';
 import 'paginas/visao_geral_page.dart';
 import 'telas.dart';
@@ -29,6 +32,9 @@ class PainelShell extends StatefulWidget {
     this.authRepository,
     this.filtrosIniciais,
     this.telaInicial = Tela.visaoGeral,
+    this.tema,
+    this.menuRetratil = true,
+    this.intervaloMonitoramento = const Duration(minutes: 5),
   });
 
   final IndicadoresRepository repository;
@@ -39,6 +45,15 @@ class PainelShell extends StatefulWidget {
   final AuthRepository? authRepository;
   final FiltrosPainel? filtrosIniciais;
   final Tela telaInicial;
+
+  /// Modo claro/escuro (botão no rodapé do menu); sem ele o botão não aparece.
+  final ControleTema? tema;
+
+  /// Menu recolhido que abre ao passar o mouse (desktop). Desligado nos testes, que tocam direto nos itens.
+  final bool menuRetratil;
+
+  /// Intervalo de atualização automática da tela Monitoramento (`null` desliga, usado nos testes).
+  final Duration? intervaloMonitoramento;
 
   @override
   State<PainelShell> createState() => _PainelShellState();
@@ -69,6 +84,8 @@ class _PainelShellState extends State<PainelShell> {
     }
   }
 
+  void _trocarGranularidade(Granularidade g) => setState(() => _filtros = _filtros.copyWith(granularidade: g));
+
   void _irPara(Tela t, {String? linha}) {
     if (!t.disponivel || !t.permitidaPara(widget.usuario.papel)) return;
     setState(() {
@@ -85,11 +102,14 @@ class _PainelShellState extends State<PainelShell> {
           filtros: _filtros,
           repository: widget.repository,
           onAbrirLinha: (codigo) => _irPara(Tela.linhas, linha: codigo),
+          onGranularidade: _trocarGranularidade,
         );
+      case Tela.monitoramento:
+        return MonitoramentoPage(key: const ValueKey('tela-monitoramento'), filtros: _filtros, repository: widget.repository, intervaloAtualizacao: widget.intervaloMonitoramento);
       case Tela.cumprimento:
-        return CumprimentoPage(key: const ValueKey('tela-cumprimento'), filtros: _filtros, repository: widget.repository);
+        return CumprimentoPage(key: const ValueKey('tela-cumprimento'), filtros: _filtros, repository: widget.repository, onGranularidade: _trocarGranularidade);
       case Tela.passageiros:
-        return PassageirosPage(key: const ValueKey('tela-passageiros'), filtros: _filtros, repository: widget.repository);
+        return PassageirosPage(key: const ValueKey('tela-passageiros'), filtros: _filtros, repository: widget.repository, onGranularidade: _trocarGranularidade);
       case Tela.linhas:
         return LinhasPage(
           key: const ValueKey('tela-linhas'),
@@ -117,15 +137,14 @@ class _PainelShellState extends State<PainelShell> {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, c) {
       final faixa = faixaDeLargura(c.maxWidth);
-      final menu = MenuLateral(
-        selecionada: _tela,
-        usuario: widget.usuario,
-        onSair: widget.onSair,
-        onSelecionar: (t) {
-          _irPara(t);
-          if (faixa != FaixaLargura.expandido) Navigator.of(context).maybePop();
-        },
-      );
+      void selecionar(Tela t) {
+        _irPara(t);
+        if (faixa != FaixaLargura.expandido) Navigator.of(context).maybePop();
+      }
+
+      final menu = faixa == FaixaLargura.expandido && widget.menuRetratil
+          ? MenuRetratil(selecionada: _tela, usuario: widget.usuario, onSair: widget.onSair, onSelecionar: selecionar, tema: widget.tema)
+          : MenuLateral(selecionada: _tela, usuario: widget.usuario, onSair: widget.onSair, onSelecionar: selecionar, tema: widget.tema);
       final barra = BarraFiltros(
         filtros: _filtros,
         linhas: _linhas,

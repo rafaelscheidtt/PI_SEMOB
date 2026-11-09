@@ -63,7 +63,6 @@ class _UsuariosPageState extends State<UsuariosPage> {
           subtitulo: 'Quem pode entrar e o que cada um enxerga',
           acao: FilledButton.icon(
             key: const Key('usuarios-novo'),
-            style: FilledButton.styleFrom(backgroundColor: Cores.navy),
             onPressed: () => _abrirFormulario(),
             icon: const Icon(Icons.person_add_alt_1_outlined, size: 18),
             label: const Text('Novo usuário'),
@@ -103,7 +102,7 @@ class _LinhaUsuario extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-        decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Cores.linha))),
+        decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Cores.linha))),
         child: Row(children: [
           CircleAvatar(radius: 16, backgroundColor: usuario.ativo ? Cores.azulSuave : Cores.fundo, child: Icon(Icons.person, size: 18, color: usuario.ativo ? Cores.azul : Cores.texto2)),
           const SizedBox(width: 12),
@@ -116,7 +115,7 @@ class _LinhaUsuario extends StatelessWidget {
           const SizedBox(width: 8),
           _Etiqueta(usuario.ativo ? usuario.papel.rotulo : 'Desativado', ativo: usuario.ativo),
           const SizedBox(width: 4),
-          const Icon(Icons.chevron_right, size: 18, color: Cores.texto2),
+          Icon(Icons.chevron_right, size: 18, color: Cores.texto2),
         ]),
       ),
     );
@@ -270,7 +269,6 @@ class _FormularioUsuarioState extends State<_FormularioUsuario> {
         TextButton(onPressed: _salvando ? null : () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
         FilledButton(
           key: const Key('usuario-salvar'),
-          style: FilledButton.styleFrom(backgroundColor: Cores.navy),
           onPressed: _salvando ? null : _salvar,
           child: Text(_salvando ? 'Salvando...' : 'Salvar'),
         ),

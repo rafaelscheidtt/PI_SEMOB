@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/tema.dart';
+import '../../core/tema_controle.dart';
 import '../../data/auth_repository.dart';
 import '../../data/models.dart';
 import '../painel/widgets/estados.dart';
@@ -8,13 +9,16 @@ import '../painel/widgets/estados.dart';
 /// Tela de entrada do painel (US11): e-mail e senha, nada de cadastro por aqui —
 /// quem cria usuário é o administrador, dentro do app.
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key, required this.repository, required this.onEntrou, this.aviso});
+  const LoginPage({super.key, required this.repository, required this.onEntrou, this.aviso, this.tema});
 
   final AuthRepository repository;
   final ValueChanged<Sessao> onEntrou;
 
   /// Mensagem mostrada ao abrir (por exemplo, "sessão expirada").
   final String? aviso;
+
+  /// Modo claro/escuro; com ele aparece o botão de alternar no canto do cartão.
+  final ControleTema? tema;
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -63,13 +67,24 @@ class _LoginPageState extends State<LoginPage> {
             constraints: const BoxConstraints(maxWidth: 400),
             child: Container(
               padding: const EdgeInsets.fromLTRB(28, 32, 28, 28),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14)),
+              decoration: BoxDecoration(color: Cores.superficie, borderRadius: BorderRadius.circular(14)),
               child: Form(
                 key: _form,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (widget.tema != null)
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: IconButton(
+                          key: const Key('login-tema'),
+                          tooltip: widget.tema!.escuro ? 'Modo claro' : 'Modo escuro',
+                          onPressed: widget.tema!.alternar,
+                          icon: Icon(widget.tema!.escuro ? Icons.light_mode_outlined : Icons.dark_mode_outlined, size: 20, color: Cores.texto2),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ),
                     Center(
                       child: Container(
                         width: 72,
@@ -122,10 +137,10 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 22),
                     FilledButton(
                       key: const Key('login-entrar'),
-                      style: FilledButton.styleFrom(backgroundColor: Cores.navy, padding: const EdgeInsets.symmetric(vertical: 16)),
+                      style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
                       onPressed: _entrando ? null : _entrar,
                       child: _entrando
-                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Cores.sobreDestaque))
                           : const Text('Entrar'),
                     ),
                     const SizedBox(height: 16),

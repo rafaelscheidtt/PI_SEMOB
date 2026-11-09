@@ -2,6 +2,8 @@
 import 'package:dashmob/core/filtros.dart';
 import 'package:dashmob/core/periodo.dart';
 import 'package:dashmob/core/sessao.dart';
+import 'package:dashmob/core/tema.dart';
+import 'package:dashmob/core/tema_controle.dart';
 import 'package:dashmob/data/auth_repository.dart';
 import 'package:dashmob/data/indicadores_repository.dart';
 import 'package:dashmob/data/models.dart';
@@ -146,10 +148,13 @@ final filtrosPadrao = FiltrosPainel(inicio: DateTime(2026, 9, 1), fim: DateTime(
 const _localizacao = [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate];
 
 /// O painel já logado (por padrão como gestor), sem passar pela tela de login.
-Widget app(IndicadoresRepository repo, {FiltrosPainel? filtros, Tela tela = Tela.visaoGeral, Usuario usuario = gestor, AuthRepository? auth, VoidCallback? onSair}) => MaterialApp(
+Widget app(IndicadoresRepository repo, {FiltrosPainel? filtros, Tela tela = Tela.visaoGeral, Usuario usuario = gestor, AuthRepository? auth, VoidCallback? onSair, bool menuRetratil = false, ControleTema? tema}) => MaterialApp(
       locale: const Locale('pt', 'BR'),
       supportedLocales: const [Locale('pt', 'BR')],
       localizationsDelegates: _localizacao,
+      theme: temaDashMob(),
+      darkTheme: temaDashMobEscuro(),
+      themeMode: tema?.value ?? ThemeMode.light,
       home: PainelShell(
         repository: repo,
         authRepository: auth ?? AuthFalso(),
@@ -157,6 +162,9 @@ Widget app(IndicadoresRepository repo, {FiltrosPainel? filtros, Tela tela = Tela
         onSair: onSair ?? () {},
         filtrosIniciais: filtros ?? filtrosPadrao,
         telaInicial: tela,
+        tema: tema,
+        menuRetratil: menuRetratil,
+        intervaloMonitoramento: null,
       ),
     );
 
@@ -165,7 +173,7 @@ Widget appCompleto(IndicadoresRepository repo, AuthFalso auth, {String? tokenGua
       locale: const Locale('pt', 'BR'),
       supportedLocales: const [Locale('pt', 'BR')],
       localizationsDelegates: _localizacao,
-      home: AppRaiz(key: UniqueKey(), sessao: SessaoAtual(), armazenamento: ArmazenamentoMemoria(tokenGuardado), auth: auth, repository: repo),
+      home: AppRaiz(key: UniqueKey(), sessao: SessaoAtual(), armazenamento: ArmazenamentoMemoria(tokenGuardado), auth: auth, repository: repo, menuRetratil: false),
     );
 
 /// Define a largura da janela de teste (o layout usa LayoutBuilder, então MediaQuery não basta).

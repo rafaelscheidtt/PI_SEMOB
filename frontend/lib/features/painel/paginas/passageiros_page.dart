@@ -7,6 +7,7 @@ import '../../../core/periodo.dart';
 import '../../../core/tema.dart';
 import '../../../data/indicadores_repository.dart';
 import '../../../data/models.dart';
+import '../widgets/barra_filtros.dart';
 import '../widgets/cartao.dart';
 import '../widgets/estados.dart';
 import '../widgets/grafico_colunas.dart';
@@ -14,10 +15,13 @@ import '../widgets/kpi_card.dart';
 
 /// Passageiros: pagantes, gratuidades, total e média por viagem (US04, RN02, RN03).
 class PassageirosPage extends StatefulWidget {
-  const PassageirosPage({super.key, required this.filtros, required this.repository});
+  const PassageirosPage({super.key, required this.filtros, required this.repository, this.onGranularidade});
 
   final FiltrosPainel filtros;
   final IndicadoresRepository repository;
+
+  /// Troca a granularidade dos gráficos (dia, semana, mês); os cartões de total não dependem dela.
+  final ValueChanged<Granularidade>? onGranularidade;
 
   @override
   State<PassageirosPage> createState() => _PassageirosPageState();
@@ -142,7 +146,7 @@ class _PassageirosPageState extends State<PassageirosPage> {
     ];
 
     final series = [
-      SerieColunas(nome: 'Pagantes (catraca + antecipados)', valores: [for (final p in d.serie) (p.pagantes ?? 0).toDouble()], cor: Cores.navy),
+      SerieColunas(nome: 'Pagantes (catraca + antecipados)', valores: [for (final p in d.serie) (p.pagantes ?? 0).toDouble()], cor: Cores.destaque),
       SerieColunas(nome: 'Gratuidades', valores: [for (final p in d.serie) (p.naoPagantes ?? 0).toDouble()], cor: Cores.verde),
     ];
 
@@ -159,6 +163,8 @@ class _PassageirosPageState extends State<PassageirosPage> {
         children: cartoes,
       ),
       const SizedBox(height: 18),
+      CabecalhoGraficos(granularidade: widget.filtros.granularidade, onChanged: widget.onGranularidade, texto: 'Evolução no período'),
+      const SizedBox(height: 12),
       Cartao(
         titulo: 'Pagantes × Gratuidades por ${widget.filtros.granularidade.rotulo.toLowerCase()}',
         subtitulo: 'Períodos sem o relatório de passageiros ficam em branco, nunca em zero (RN06)',

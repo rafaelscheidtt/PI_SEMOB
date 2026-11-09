@@ -102,12 +102,15 @@ flutter run -d chrome --dart-define=API_URL=http://localhost:8000
 
 ## Telas
 
-O app segue o protótipo do Figma: menu lateral, barra de filtros (intervalo, visão diária/semanal/mensal
-e linha) e as telas abaixo. Os filtros valem para todas as telas.
+O app segue o protótipo do Figma: menu lateral (recolhido, abre ao passar o mouse), barra de filtros
+(intervalo e linha, que valem para todas as telas) e as telas abaixo. A visão diária, semanal ou mensal
+fica em cima dos gráficos de cada tela, porque só eles mudam com ela. Tem modo escuro, no botão de lua
+do rodapé do menu (a escolha fica guardada no aparelho).
 
 | Tela | O que mostra |
 |------|--------------|
 | Visão Geral | km, viagens, passageiros e gratuidades com a variação em relação ao período anterior, pagantes × gratuidades, cumprimento por turno, viagens por faixa horária e a tabela de monitoramento por linha |
+| Monitoramento | tela para TV: seis números grandes (km, viagens, cumprimento, passageiros, gratuidades e viagens não realizadas) com a variação, mais o cumprimento por turno; atualiza sozinha a cada 5 minutos |
 | Linhas | a mesma tabela com busca e, ao clicar, o detalhamento da linha: indicadores, faixa horária e ocorrências de viagem |
 | Cumprimento de viagens | FCV do período, por turno e ao longo do tempo, com os períodos em que faltaram mais viagens |
 | Passageiros | pagantes, gratuidades, total e média por viagem (sempre do sistema inteiro) |

@@ -48,7 +48,7 @@ class AvisoSemDados extends StatelessWidget {
       padding: const EdgeInsets.all(28),
       child: Center(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Icon(Icons.inbox_outlined, size: 36, color: Cores.texto2),
+          Icon(Icons.inbox_outlined, size: 36, color: Cores.texto2),
           const SizedBox(height: 10),
           Text(texto, key: const Key('aviso-sem-dados'), style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 4),
@@ -76,9 +76,9 @@ class Aviso extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(children: [
-        const Icon(Icons.info_outline, color: Cores.azul, size: 18),
+        Icon(Icons.info_outline, color: Cores.azul, size: 18),
         const SizedBox(width: 10),
-        Expanded(child: Text(texto, key: chave, style: const TextStyle(color: Cores.azul, fontSize: 13))),
+        Expanded(child: Text(texto, key: chave, style: TextStyle(color: Cores.azul, fontSize: 13))),
       ]),
     );
   }

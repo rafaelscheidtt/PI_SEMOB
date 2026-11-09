@@ -5,14 +5,17 @@ import '../../../core/tema.dart';
 
 /// Linha pequena com a tendência da série, sem eixos, usada dentro dos cartões de indicador.
 class Sparkline extends StatelessWidget {
-  const Sparkline({super.key, required this.valores, this.cor = Cores.navy, this.altura = 34});
+  const Sparkline({super.key, required this.valores, this.cor, this.altura = 34});
 
   final List<double> valores;
-  final Color cor;
+
+  /// Sem cor, usa a cor de destaque da paleta (navy no claro, azul-claro no escuro).
+  final Color? cor;
   final double altura;
 
   @override
   Widget build(BuildContext context) {
+    final corFinal = cor ?? Cores.destaque;
     if (valores.length < 2) return SizedBox(height: altura);
     var maior = 0.0;
     for (final v in valores) {
@@ -35,10 +38,10 @@ class Sparkline extends StatelessWidget {
               spots: [for (var i = 0; i < valores.length; i++) FlSpot(i.toDouble(), valores[i])],
               isCurved: true,
               curveSmoothness: 0.25,
-              color: cor,
+              color: corFinal,
               barWidth: 2,
               dotData: const FlDotData(show: false),
-              belowBarData: BarAreaData(show: true, color: cor.withValues(alpha: 0.12)),
+              belowBarData: BarAreaData(show: true, color: corFinal.withValues(alpha: 0.12)),
             ),
           ],
         ),

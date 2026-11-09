@@ -7,6 +7,7 @@ import '../../../core/periodo.dart';
 import '../../../core/tema.dart';
 import '../../../data/indicadores_repository.dart';
 import '../../../data/models.dart';
+import '../widgets/barra_filtros.dart';
 import '../widgets/cartao.dart';
 import '../widgets/estados.dart';
 import '../widgets/grafico_colunas.dart';
@@ -14,10 +15,13 @@ import '../widgets/kpi_card.dart';
 
 /// Cumprimento de viagens: FCV do período, por turno e ao longo do tempo (US03, RN08).
 class CumprimentoPage extends StatefulWidget {
-  const CumprimentoPage({super.key, required this.filtros, required this.repository});
+  const CumprimentoPage({super.key, required this.filtros, required this.repository, this.onGranularidade});
 
   final FiltrosPainel filtros;
   final IndicadoresRepository repository;
+
+  /// Troca a granularidade dos gráficos (dia, semana, mês); os cartões de total não dependem dela.
+  final ValueChanged<Granularidade>? onGranularidade;
 
   @override
   State<CumprimentoPage> createState() => _CumprimentoPageState();
@@ -28,6 +32,9 @@ class _CumprimentoPageState extends State<CumprimentoPage> {
   DetalhesOperacao _detalhes = DetalhesOperacao.vazio;
   String? _erro;
   bool _carregando = true;
+
+  /// Aproxima a escala do gráfico de FCV para a variação dos décimos aparecer (padrão: 0 a 100%).
+  bool _aproximar = false;
 
   @override
   void initState() {
@@ -148,14 +155,28 @@ class _CumprimentoPageState extends State<CumprimentoPage> {
     final turnos = _detalhes.turnos;
     final piores = [...d.serie.where((p) => p.fcv != null)]..sort((a, b) => a.fcv!.compareTo(b.fcv!));
 
+    // O eixo vai de 0 a 100% para não deixar dúvida sobre o tamanho real do cumprimento;
+    // como a variação costuma ficar nos décimos, dá para aproximar a escala com o botão.
+    final valoresFcv = [for (final p in d.serie) p.fcv ?? 0];
+    final piso = _aproximar ? pisoDoEixo(valoresFcv) : 0.0;
     final graficoFcv = Cartao(
       titulo: 'Cumprimento por ${widget.filtros.granularidade.rotulo.toLowerCase()}',
-      subtitulo: 'Percentual de viagens realizadas em cada período',
+      subtitulo: piso > 0
+          ? 'Percentual de viagens realizadas em cada período · escala aproximada, eixo a partir de ${fmtDecimal(piso)}%'
+          : 'Percentual de viagens realizadas em cada período · eixo de 0 a 100%',
+      acao: FilterChip(
+        key: const Key('fcv-aproximar'),
+        label: const Text('Aproximar escala'),
+        selected: _aproximar,
+        onSelected: (v) => setState(() => _aproximar = v),
+        visualDensity: VisualDensity.compact,
+      ),
       child: GraficoColunas(
         rotulos: [for (final p in d.serie) rotuloPeriodo(p.periodo)],
-        series: [SerieColunas(nome: 'FCV', valores: [for (final p in d.serie) p.fcv ?? 0], cor: Cores.verde)],
+        series: [SerieColunas(nome: 'FCV', valores: valoresFcv, cor: Cores.verde)],
         formato: (v) => '${fmtDecimal(v)}%',
         maximoY: 100,
+        minimoY: piso,
         altura: 230,
       ),
     );
@@ -208,7 +229,7 @@ class _CumprimentoPageState extends State<CumprimentoPage> {
               Expanded(child: Text(fmtPercentual(p.fcv!), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600))),
               Text(
                 p.viagensNaoRealizadas == null ? '' : '${fmtInteiro(p.viagensNaoRealizadas!)} viagens a menos',
-                style: const TextStyle(fontSize: 12, color: Cores.texto2),
+                style: TextStyle(fontSize: 12, color: Cores.texto2),
               ),
             ]),
           ),
@@ -229,6 +250,8 @@ class _CumprimentoPageState extends State<CumprimentoPage> {
         children: cartoes,
       ),
       const SizedBox(height: 18),
+      CabecalhoGraficos(granularidade: widget.filtros.granularidade, onChanged: widget.onGranularidade, texto: 'Evolução no período'),
+      const SizedBox(height: 12),
       graficoFcv,
       const SizedBox(height: 18),
       if (expandido)

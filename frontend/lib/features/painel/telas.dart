@@ -5,6 +5,7 @@ import '../../data/models.dart';
 /// Telas do menu lateral. As de gestão entram na Sprint 2 e aparecem desativadas.
 enum Tela {
   visaoGeral('Visão Geral', Icons.dashboard_outlined),
+  monitoramento('Monitoramento', Icons.tv_outlined),
   linhas('Linhas', Icons.route_outlined),
   cumprimento('Cumprimento de viagens', Icons.task_alt_outlined),
   passageiros('Passageiros', Icons.groups_outlined),
@@ -35,7 +36,7 @@ enum Tela {
       case Papel.gestor:
         return !administracao;
       case Papel.executivo:
-        return this == visaoGeral || this == cumprimento || this == passageiros;
+        return this == visaoGeral || this == monitoramento || this == cumprimento || this == passageiros;
     }
   }
 

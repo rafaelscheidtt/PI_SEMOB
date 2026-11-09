@@ -26,7 +26,7 @@ class Cartao extends StatelessWidget {
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Cores.superficie,
         border: Border.all(color: Cores.linha),
         borderRadius: BorderRadius.circular(10),
       ),
@@ -64,7 +64,7 @@ class Cartao extends StatelessWidget {
         children: [
           Expanded(child: titulos),
           const SizedBox(width: 12),
-          Flexible(child: acao!),
+          Flexible(child: Align(alignment: Alignment.topRight, child: acao!)),
         ],
       );
     });
@@ -111,7 +111,7 @@ class Rotulo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       texto.toUpperCase(),
-      style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 1.1, color: Cores.texto2),
+      style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 1.1, color: Cores.texto2),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
@@ -130,8 +130,8 @@ class CodigoLinha extends StatelessWidget {
       width: 30,
       height: 24,
       alignment: Alignment.center,
-      decoration: BoxDecoration(color: Cores.navy, borderRadius: BorderRadius.circular(5)),
-      child: Text(codigo, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 11.5)),
+      decoration: BoxDecoration(color: Cores.destaque, borderRadius: BorderRadius.circular(5)),
+      child: Text(codigo, style: TextStyle(color: Cores.sobreDestaque, fontWeight: FontWeight.w700, fontSize: 11.5)),
     );
   }
 }
