@@ -7,7 +7,7 @@ from app.auth import usuario_atual
 from app.config import settings
 from app.db import criar_indices, get_db
 from app.repositories.usuarios import garantir_admin_inicial
-from app.routers import importacoes, indicadores, usuarios
+from app.routers import alertas, importacoes, indicadores, usuarios
 
 
 @asynccontextmanager
@@ -44,6 +44,7 @@ app.add_middleware(
 app.include_router(usuarios.router)
 app.include_router(indicadores.router, dependencies=[Depends(usuario_atual)])
 app.include_router(importacoes.router, dependencies=[Depends(usuario_atual)])
+app.include_router(alertas.router, dependencies=[Depends(usuario_atual)])
 
 
 @app.get("/health", tags=["infra"])
