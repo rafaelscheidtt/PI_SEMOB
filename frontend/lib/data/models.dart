@@ -427,3 +427,104 @@ class Sessao {
         usuario: Usuario.fromJson(j['usuario'] as Map<String, dynamic>),
       );
 }
+
+/// Um período da série financeira (GET /indicadores/financeiro), valores em reais.
+class PontoFinanceiro {
+  const PontoFinanceiro({
+    required this.periodo,
+    required this.vendas,
+    required this.utilizacao,
+    required this.creditoCirculante,
+    required this.creditosTransferidos,
+    this.saldoFinal,
+    this.diasComDados = 0,
+  });
+
+  final String periodo;
+  final double vendas;
+  final double utilizacao;
+  final double creditoCirculante;
+  final double creditosTransferidos;
+  final double? saldoFinal;
+  final int diasComDados;
+
+  factory PontoFinanceiro.fromJson(Map<String, dynamic> j) => PontoFinanceiro(
+        periodo: j['periodo'] as String,
+        vendas: (j['vendas'] as num).toDouble(),
+        utilizacao: (j['utilizacao'] as num).toDouble(),
+        creditoCirculante: (j['credito_circulante'] as num).toDouble(),
+        creditosTransferidos: (j['creditos_transferidos'] as num).toDouble(),
+        saldoFinal: (j['saldo_final'] as num?)?.toDouble(),
+        diasComDados: (j['dias_com_dados'] as int?) ?? 0,
+      );
+}
+
+/// Totais financeiros do período (US07).
+class TotaisFinanceiro {
+  const TotaisFinanceiro({
+    required this.vendas,
+    required this.utilizacao,
+    required this.creditoCirculante,
+    required this.creditosTransferidos,
+    this.saldoFinal,
+    this.vendasPorDia,
+    this.utilizacaoPorDia,
+    this.diasComDados = 0,
+  });
+
+  final double vendas;
+  final double utilizacao;
+  final double creditoCirculante;
+  final double creditosTransferidos;
+  final double? saldoFinal;
+  final double? vendasPorDia;
+  final double? utilizacaoPorDia;
+  final int diasComDados;
+
+  factory TotaisFinanceiro.fromJson(Map<String, dynamic> j) => TotaisFinanceiro(
+        vendas: (j['vendas'] as num).toDouble(),
+        utilizacao: (j['utilizacao'] as num).toDouble(),
+        creditoCirculante: (j['credito_circulante'] as num).toDouble(),
+        creditosTransferidos: (j['creditos_transferidos'] as num).toDouble(),
+        saldoFinal: (j['saldo_final'] as num?)?.toDouble(),
+        vendasPorDia: (j['vendas_por_dia'] as num?)?.toDouble(),
+        utilizacaoPorDia: (j['utilizacao_por_dia'] as num?)?.toDouble(),
+        diasComDados: (j['dias_com_dados'] as int?) ?? 0,
+      );
+}
+
+class FinanceiroAnterior {
+  const FinanceiroAnterior({required this.inicio, required this.fim, required this.totais});
+
+  final DateTime inicio;
+  final DateTime fim;
+  final TotaisFinanceiro totais;
+
+  factory FinanceiroAnterior.fromJson(Map<String, dynamic> j) => FinanceiroAnterior(
+        inicio: DateTime.parse(j['inicio'] as String),
+        fim: DateTime.parse(j['fim'] as String),
+        totais: TotaisFinanceiro.fromJson(j['totais'] as Map<String, dynamic>),
+      );
+}
+
+/// Resposta financeira do período. [inicioBilhetagem] é o primeiro dia com dado financeiro
+/// no banco, para explicar períodos vazios (antes do fim do Tarifa Zero não havia bilhetagem).
+class Financeiro {
+  const Financeiro({required this.semDados, required this.serie, this.totais, this.anterior, this.inicioBilhetagem});
+
+  final bool semDados;
+  final List<PontoFinanceiro> serie;
+  final TotaisFinanceiro? totais;
+  final FinanceiroAnterior? anterior;
+  final DateTime? inicioBilhetagem;
+
+  factory Financeiro.fromJson(Map<String, dynamic> j) => Financeiro(
+        semDados: j['sem_dados'] as bool,
+        serie: (j['serie'] as List).map((e) => PontoFinanceiro.fromJson(e as Map<String, dynamic>)).toList(),
+        totais: j['totais'] == null ? null : TotaisFinanceiro.fromJson(j['totais'] as Map<String, dynamic>),
+        anterior: j['anterior'] == null ? null : FinanceiroAnterior.fromJson(j['anterior'] as Map<String, dynamic>),
+        inicioBilhetagem: _dataHora(j['inicio_bilhetagem']),
+      );
+
+  static const vazio = Financeiro(semDados: true, serie: []);
+}

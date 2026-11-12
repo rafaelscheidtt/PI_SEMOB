@@ -15,8 +15,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class RepositorioFalso implements IndicadoresRepository {
-  RepositorioFalso(this.resposta, {this.historico = const [], this.resultadoImportacao});
+  RepositorioFalso(this.resposta, {this.historico = const [], this.resultadoImportacao, Financeiro? respostaFinanceira})
+      : respostaFinanceira = respostaFinanceira ?? comFinanceiro;
   final Indicadores resposta;
+  final Financeiro respostaFinanceira;
   final List<Importacao> historico;
   final ResultadoImportacao? resultadoImportacao;
   List<ArquivoEnvio>? arquivosEnviados;
@@ -24,6 +26,7 @@ class RepositorioFalso implements IndicadoresRepository {
   String? ultimaLinha;
   bool? ultimoComparar;
   int consultas = 0;
+  int consultasFinanceiro = 0;
 
   @override
   Future<Indicadores> obter({required DateTime inicio, required DateTime fim, required Granularidade granularidade, String? linha, bool comparar = false}) async {
@@ -57,6 +60,12 @@ class RepositorioFalso implements IndicadoresRepository {
         turnos: linha != null ? const [] : const [Turno(turno: 'manha', programadas: 50, realizadas: 49, fcv: 98), Turno(turno: 'tarde', programadas: 52, realizadas: 51, fcv: 98.08)],
         faixasHorarias: const [FaixaHoraria(faixa: 5, viagens: 10), FaixaHoraria(faixa: 6, viagens: 30), FaixaHoraria(faixa: 7, viagens: 20)],
       );
+
+  @override
+  Future<Financeiro> financeiro({required DateTime inicio, required DateTime fim, required Granularidade granularidade, bool comparar = false}) async {
+    consultasFinanceiro++;
+    return respostaFinanceira;
+  }
 
   @override
   Future<List<Importacao>> importacoes() async => historico;
@@ -117,6 +126,22 @@ class AuthFalso implements AuthRepository {
     return novo;
   }
 }
+
+/// Financeiro de exemplo: bilhetagem desde 15/07/2026, duas semanas na série.
+final comFinanceiro = Financeiro(
+  semDados: false,
+  serie: const [
+    PontoFinanceiro(periodo: '2026-W37', vendas: 32448, utilizacao: 34320, creditoCirculante: -1872, creditosTransferidos: 39000, saldoFinal: 961000, diasComDados: 7),
+    PontoFinanceiro(periodo: '2026-W38', vendas: 40000, utilizacao: 30000, creditoCirculante: 10000, creditosTransferidos: 20000, saldoFinal: 971000, diasComDados: 7),
+  ],
+  totais: const TotaisFinanceiro(vendas: 72448, utilizacao: 64320, creditoCirculante: 8128, creditosTransferidos: 59000, saldoFinal: 971000, vendasPorDia: 5174.86, utilizacaoPorDia: 4594.29, diasComDados: 14),
+  anterior: FinanceiroAnterior(
+    inicio: DateTime(2026, 8, 1),
+    fim: DateTime(2026, 8, 31),
+    totais: const TotaisFinanceiro(vendas: 60000, utilizacao: 64320, creditoCirculante: -4320, creditosTransferidos: 50000, saldoFinal: 900000, diasComDados: 31),
+  ),
+  inicioBilhetagem: DateTime(2026, 7, 15),
+);
 
 const comDados = Indicadores(
   semDados: false,

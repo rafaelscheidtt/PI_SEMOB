@@ -115,9 +115,10 @@ do rodapé do menu (a escolha fica guardada no aparelho).
 | Cumprimento de viagens | FCV do período, por turno e ao longo do tempo, com os períodos em que faltaram mais viagens |
 | Passageiros | pagantes, gratuidades, total e média por viagem (sempre do sistema inteiro) |
 | Importação de relatórios | envio do pacote (HTML ou .zip) e histórico do que já foi importado (gestor e administrador) |
+| Financeiro | vendas, utilização, crédito circulante e saldo de créditos da bilhetagem, em reais, com o aviso do Tarifa Zero para períodos sem bilhetagem |
 | Usuários | cadastro, papel e desativação de usuários (só o administrador) |
 
-Financeiro, Alertas e Relatórios aparecem no menu marcadas como Sprint 2.
+Alertas e Relatórios aparecem no menu marcadas como Sprint 2.
 
 ## Relatórios importados
 
@@ -152,6 +153,8 @@ Fora `/login` e `/health`, todas pedem o cabeçalho `Authorization: Bearer <toke
 | `GET /indicadores` | série e totais do período (`inicio`, `fim`, `granularidade`, `linha`, `comparar`) |
 | `GET /indicadores/linhas` | km, viagens e ocorrências por linha |
 | `GET /indicadores/detalhes` | cumprimento por turno e viagens por faixa horária (`inicio`, `fim`, `linha`) |
+| `GET /indicadores/financeiro` | vendas, utilização, crédito circulante e saldo de créditos por período (`inicio`, `fim`, `granularidade`, `comparar`) |
+| `GET /alertas` | dias fora do padrão: cumprimento baixo, desvio do histórico e excesso de ocorrências (`inicio`, `fim`, `linha`) |
 | `GET /ocorrencias` | lista de ocorrências de viagem |
 | `GET /linhas` | linhas cadastradas |
 

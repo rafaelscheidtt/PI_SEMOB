@@ -24,7 +24,7 @@ class EmConstrucaoPage extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                tela.gestao ? 'Esta tela está prevista para a Sprint 2.' : 'Esta tela está em desenvolvimento.',
+                tela.emConstrucao ? 'Esta tela está prevista para a Sprint 2.' : 'Esta tela está em desenvolvimento.',
                 key: const Key('aviso-em-construcao'),
               ),
             ),
