@@ -9,6 +9,7 @@ import 'package:dashmob/data/indicadores_repository.dart';
 import 'package:dashmob/data/models.dart';
 import 'package:dashmob/features/painel/painel_shell.dart';
 import 'package:dashmob/features/painel/telas.dart';
+import 'package:dashmob/features/relatorios/relatorios_page.dart';
 import 'package:dashmob/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -189,7 +190,7 @@ final filtrosPadrao = FiltrosPainel(inicio: DateTime(2026, 9, 1), fim: DateTime(
 const _localizacao = [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate];
 
 /// O painel já logado (por padrão como gestor), sem passar pela tela de login.
-Widget app(IndicadoresRepository repo, {FiltrosPainel? filtros, Tela tela = Tela.visaoGeral, Usuario usuario = gestor, AuthRepository? auth, VoidCallback? onSair, bool menuRetratil = false, ControleTema? tema}) => MaterialApp(
+Widget app(IndicadoresRepository repo, {FiltrosPainel? filtros, Tela tela = Tela.visaoGeral, Usuario usuario = gestor, AuthRepository? auth, VoidCallback? onSair, bool menuRetratil = false, ControleTema? tema, SalvarPdf? salvarPdf}) => MaterialApp(
       locale: const Locale('pt', 'BR'),
       supportedLocales: const [Locale('pt', 'BR')],
       localizationsDelegates: _localizacao,
@@ -206,6 +207,8 @@ Widget app(IndicadoresRepository repo, {FiltrosPainel? filtros, Tela tela = Tela
         tema: tema,
         menuRetratil: menuRetratil,
         intervaloMonitoramento: null,
+        salvarPdf: salvarPdf ?? (bytes, nome) async {},
+        brasaoPdf: () async => null,
       ),
     );
 

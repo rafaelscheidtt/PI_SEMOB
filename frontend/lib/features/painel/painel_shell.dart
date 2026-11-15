@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import '../../core/filtros.dart';
@@ -8,10 +10,10 @@ import '../../core/tema_controle.dart';
 import '../../data/auth_repository.dart';
 import '../../data/indicadores_repository.dart';
 import '../../data/models.dart';
+import '../relatorios/relatorios_page.dart';
 import '../usuarios/usuarios_page.dart';
 import 'paginas/alertas_page.dart';
 import 'paginas/cumprimento_page.dart';
-import 'paginas/em_construcao_page.dart';
 import 'paginas/financeiro_page.dart';
 import 'paginas/importacao_page.dart';
 import 'paginas/linhas_page.dart';
@@ -37,6 +39,8 @@ class PainelShell extends StatefulWidget {
     this.tema,
     this.menuRetratil = true,
     this.intervaloMonitoramento = const Duration(minutes: 5),
+    this.salvarPdf = salvarPdfNoAparelho,
+    this.brasaoPdf = carregarBrasao,
   });
 
   final IndicadoresRepository repository;
@@ -56,6 +60,9 @@ class PainelShell extends StatefulWidget {
 
   /// Intervalo de atualização automática da tela Monitoramento (`null` desliga, usado nos testes).
   final Duration? intervaloMonitoramento;
+  /// Como o PDF da tela Relatórios chega ao usuário (nos testes é substituído).
+  final SalvarPdf salvarPdf;
+  final Future<Uint8List?> Function() brasaoPdf;
 
   @override
   State<PainelShell> createState() => _PainelShellState();
@@ -89,7 +96,7 @@ class _PainelShellState extends State<PainelShell> {
   void _trocarGranularidade(Granularidade g) => setState(() => _filtros = _filtros.copyWith(granularidade: g));
 
   void _irPara(Tela t, {String? linha}) {
-    if (!t.disponivel || !t.permitidaPara(widget.usuario.papel)) return;
+    if (!t.permitidaPara(widget.usuario.papel)) return;
     setState(() {
       _tela = t;
       _linhaAberta = linha;
@@ -134,7 +141,7 @@ class _PainelShellState extends State<PainelShell> {
       case Tela.alertas:
         return AlertasPage(key: const ValueKey('tela-alertas'), filtros: _filtros, repository: widget.repository);
       case Tela.relatorios:
-        return EmConstrucaoPage(key: ValueKey('tela-${_tela.name}'), tela: _tela);
+        return RelatoriosPage(key: const ValueKey('tela-relatorios'), filtros: _filtros, repository: widget.repository, usuario: widget.usuario, salvar: widget.salvarPdf, brasao: widget.brasaoPdf);
     }
   }
 

@@ -62,14 +62,13 @@ void main() {
     expect(kpi(tester, 'Vendas'), 'R\$ 72.448');
   });
 
-  testWidgets('US07 Financeiro entra no menu e as outras telas de gestão seguem como Sprint 2', (tester) async {
+  testWidgets('US07 Financeiro abre pelo menu', (tester) async {
     janela(tester, 1400);
     await tester.pumpWidget(app(RepositorioFalso(comDados)));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('menu-financeiro')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('tela-financeiro')), findsOneWidget);
-    expect(find.text('Sprint 2'), findsNWidgets(1));
   });
 
   testWidgets('US06 Financeiro em tela de celular fica em uma coluna', (tester) async {

@@ -198,7 +198,7 @@ class _ItemMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cor = !tela.disponivel ? Cores.menuApagado : (ativo ? Colors.white : Cores.menuTexto);
+    final cor = ativo ? Colors.white : Cores.menuTexto;
     final conteudo = compacto
         ? Tooltip(
             message: tela.rotulo,
@@ -218,12 +218,6 @@ class _ItemMenu extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (!tela.disponivel)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                  decoration: BoxDecoration(color: Cores.menuEtiqueta, borderRadius: BorderRadius.circular(999)),
-                  child: const Text('Sprint 2', style: TextStyle(color: Color(0xFFA9ACD6), fontSize: 10)),
-                ),
             ]),
           );
     return Material(
