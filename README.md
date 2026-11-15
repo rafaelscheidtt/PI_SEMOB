@@ -116,9 +116,10 @@ do rodapé do menu (a escolha fica guardada no aparelho).
 | Passageiros | pagantes, gratuidades, total e média por viagem (sempre do sistema inteiro) |
 | Importação de relatórios | envio do pacote (HTML ou .zip) e histórico do que já foi importado (gestor e administrador) |
 | Financeiro | vendas, utilização, crédito circulante e saldo de créditos da bilhetagem, em reais, com o aviso do Tarifa Zero para períodos sem bilhetagem |
+| Alertas | dias fora do padrão: cumprimento abaixo de 95%/90% (RN09), desvio acima de 20%/35% do mesmo dia da semana nas últimas 8 semanas (RN10) e excesso de ocorrências (RN11); a Visão Geral mostra uma faixa com o total |
 | Usuários | cadastro, papel e desativação de usuários (só o administrador) |
 
-Alertas e Relatórios aparecem no menu marcadas como Sprint 2.
+Relatórios aparece no menu marcada como Sprint 2.
 
 ## Relatórios importados
 

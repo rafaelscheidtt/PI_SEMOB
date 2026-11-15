@@ -15,10 +15,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class RepositorioFalso implements IndicadoresRepository {
-  RepositorioFalso(this.resposta, {this.historico = const [], this.resultadoImportacao, Financeiro? respostaFinanceira})
-      : respostaFinanceira = respostaFinanceira ?? comFinanceiro;
+  RepositorioFalso(this.resposta, {this.historico = const [], this.resultadoImportacao, Financeiro? respostaFinanceira, Alertas? respostaAlertas})
+      : respostaFinanceira = respostaFinanceira ?? comFinanceiro,
+        respostaAlertas = respostaAlertas ?? comAlertas;
   final Indicadores resposta;
   final Financeiro respostaFinanceira;
+  final Alertas respostaAlertas;
   final List<Importacao> historico;
   final ResultadoImportacao? resultadoImportacao;
   List<ArquivoEnvio>? arquivosEnviados;
@@ -27,6 +29,7 @@ class RepositorioFalso implements IndicadoresRepository {
   bool? ultimoComparar;
   int consultas = 0;
   int consultasFinanceiro = 0;
+  String? ultimaLinhaAlertas;
 
   @override
   Future<Indicadores> obter({required DateTime inicio, required DateTime fim, required Granularidade granularidade, String? linha, bool comparar = false}) async {
@@ -65,6 +68,12 @@ class RepositorioFalso implements IndicadoresRepository {
   Future<Financeiro> financeiro({required DateTime inicio, required DateTime fim, required Granularidade granularidade, bool comparar = false}) async {
     consultasFinanceiro++;
     return respostaFinanceira;
+  }
+
+  @override
+  Future<Alertas> alertas({required DateTime inicio, required DateTime fim, String? linha}) async {
+    ultimaLinhaAlertas = linha;
+    return respostaAlertas;
   }
 
   @override
@@ -142,6 +151,13 @@ final comFinanceiro = Financeiro(
   ),
   inicioBilhetagem: DateTime(2026, 7, 15),
 );
+
+/// Alertas de exemplo: um crítico e dois avisos em dois dias.
+final comAlertas = Alertas(total: 3, criticos: 1, avisos: 2, alertas: [
+  Alerta(data: DateTime(2026, 9, 8), tipo: 'cumprimento', indicador: 'fcv', severidade: Severidade.critico, valor: 88, esperado: 95, desvio: -12, mensagem: 'Cumprimento de 88,0% (88 de 100 viagens programadas)'),
+  Alerta(data: DateTime(2026, 9, 8), tipo: 'historico', indicador: 'km_total', severidade: Severidade.aviso, valor: 700, esperado: 1000, desvio: -30, mensagem: 'Quilometragem 30% abaixo do normal de uma terça (700 km vs. 1.000 km em média nas últimas 8 semanas)'),
+  Alerta(data: DateTime(2026, 9, 5), tipo: 'ocorrencias', indicador: 'ocorrencias', severidade: Severidade.aviso, valor: 9, esperado: 1.8, desvio: 400, mensagem: '9 viagens com ocorrência no dia, 5,0x a média do período (1,8 por dia)', linha: '02'),
+]);
 
 const comDados = Indicadores(
   semDados: false,

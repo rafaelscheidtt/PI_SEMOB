@@ -30,6 +30,9 @@ abstract class IndicadoresRepository {
   /// Vendas, utilização, crédito circulante e saldo de créditos do período (US07); sempre do sistema inteiro.
   Future<Financeiro> financeiro({required DateTime inicio, required DateTime fim, required Granularidade granularidade, bool comparar = false});
 
+  /// Dias fora do padrão no período (US08): cumprimento baixo, desvio do histórico e excesso de ocorrências.
+  Future<Alertas> alertas({required DateTime inicio, required DateTime fim, String? linha});
+
   /// Histórico de relatórios importados, do mais recente para o mais antigo.
   Future<List<Importacao>> importacoes();
 
@@ -135,6 +138,16 @@ class IndicadoresRepositoryHttp implements IndicadoresRepository {
       return Financeiro.fromJson(r.data!);
     } on DioException catch (e) {
       throw _erro(e, 'Não foi possível carregar o financeiro');
+    }
+  }
+
+  @override
+  Future<Alertas> alertas({required DateTime inicio, required DateTime fim, String? linha}) async {
+    try {
+      final r = await _dio.get<Map<String, dynamic>>('/alertas', queryParameters: _periodo(inicio, fim, linha));
+      return Alertas.fromJson(r.data!);
+    } on DioException catch (e) {
+      throw _erro(e, 'Não foi possível carregar os alertas');
     }
   }
 

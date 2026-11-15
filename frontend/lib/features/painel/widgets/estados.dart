@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/tema.dart';
+import '../../../data/models.dart';
 
 /// Indicador de carregamento usado por todas as telas.
 class Carregando extends StatelessWidget {
@@ -79,6 +80,40 @@ class Aviso extends StatelessWidget {
         Icon(Icons.info_outline, color: Cores.azul, size: 18),
         const SizedBox(width: 10),
         Expanded(child: Text(texto, key: chave, style: TextStyle(color: Cores.azul, fontSize: 13))),
+      ]),
+    );
+  }
+}
+
+/// Faixa de destaque da Visão Geral quando o período tem alertas (US08).
+class FaixaAlertas extends StatelessWidget {
+  const FaixaAlertas({super.key, required this.alertas, this.onVer});
+
+  final Alertas alertas;
+  final VoidCallback? onVer;
+
+  @override
+  Widget build(BuildContext context) {
+    final critico = alertas.criticos > 0;
+    final cor = critico ? Cores.vermelho : Cores.ambar;
+    final fundo = critico ? Cores.vermelhoSuave : Cores.ambarSuave;
+    final texto = StringBuffer('${alertas.total} ${alertas.total == 1 ? 'alerta' : 'alertas'} no período');
+    if (critico) texto.write(' (${alertas.criticos} ${alertas.criticos == 1 ? 'crítico' : 'críticos'})');
+    texto.write(' · ${alertas.diasComAlerta} ${alertas.diasComAlerta == 1 ? 'dia' : 'dias'} fora do padrão');
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(color: fundo, border: Border.all(color: cor.withValues(alpha: 0.35)), borderRadius: BorderRadius.circular(10)),
+      child: Row(children: [
+        Icon(critico ? Icons.warning_amber_rounded : Icons.notifications_active_outlined, color: cor, size: 20),
+        const SizedBox(width: 10),
+        Expanded(child: Text(texto.toString(), key: const Key('faixa-alertas'), style: TextStyle(color: cor, fontSize: 13, fontWeight: FontWeight.w600))),
+        if (onVer != null)
+          TextButton(
+            key: const Key('faixa-alertas-ver'),
+            onPressed: onVer,
+            style: TextButton.styleFrom(foregroundColor: cor, padding: const EdgeInsets.symmetric(horizontal: 10)),
+            child: const Text('Ver alertas'),
+          ),
       ]),
     );
   }

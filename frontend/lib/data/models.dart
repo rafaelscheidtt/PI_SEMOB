@@ -528,3 +528,88 @@ class Financeiro {
 
   static const vazio = Financeiro(semDados: true, serie: []);
 }
+
+/// Gravidade de um alerta (US08).
+enum Severidade {
+  aviso('aviso', 'Aviso'),
+  critico('critico', 'Crítico');
+
+  const Severidade(this.valorApi, this.rotulo);
+  final String valorApi;
+  final String rotulo;
+
+  static Severidade daApi(String? v) => v == 'critico' ? critico : aviso;
+}
+
+/// Um dia fora do padrão (GET /alertas): cumprimento baixo, desvio do histórico ou excesso de ocorrências.
+class Alerta {
+  const Alerta({
+    required this.data,
+    required this.tipo,
+    required this.indicador,
+    required this.severidade,
+    required this.valor,
+    required this.mensagem,
+    this.esperado,
+    this.desvio,
+    this.linha,
+  });
+
+  final DateTime data;
+
+  /// `cumprimento`, `historico` ou `ocorrencias`.
+  final String tipo;
+
+  /// `fcv`, `km_total`, `viagens_realizadas`, `passageiros_total` ou `ocorrencias`.
+  final String indicador;
+  final Severidade severidade;
+  final double valor;
+  final double? esperado;
+  final double? desvio;
+  final String mensagem;
+  final String? linha;
+
+  factory Alerta.fromJson(Map<String, dynamic> j) => Alerta(
+        data: DateTime.parse(j['data'] as String),
+        tipo: (j['tipo'] ?? '') as String,
+        indicador: (j['indicador'] ?? '') as String,
+        severidade: Severidade.daApi(j['severidade'] as String?),
+        valor: (j['valor'] as num).toDouble(),
+        esperado: (j['esperado'] as num?)?.toDouble(),
+        desvio: (j['desvio'] as num?)?.toDouble(),
+        mensagem: (j['mensagem'] ?? '') as String,
+        linha: j['linha'] as String?,
+      );
+
+  /// Nome do tipo para a tela ("Cumprimento", "Padrão histórico", "Ocorrências").
+  String get tipoRotulo => switch (tipo) {
+        'cumprimento' => 'Cumprimento',
+        'historico' => 'Padrão histórico',
+        'ocorrencias' => 'Ocorrências',
+        _ => tipo,
+      };
+}
+
+/// Resposta do GET /alertas.
+class Alertas {
+  const Alertas({required this.total, required this.criticos, required this.avisos, required this.alertas, this.linha});
+
+  final int total;
+  final int criticos;
+  final int avisos;
+  final List<Alerta> alertas;
+  final String? linha;
+
+  factory Alertas.fromJson(Map<String, dynamic> j) => Alertas(
+        total: (j['total'] as int?) ?? 0,
+        criticos: (j['criticos'] as int?) ?? 0,
+        avisos: (j['avisos'] as int?) ?? 0,
+        alertas: (j['alertas'] as List).map((e) => Alerta.fromJson(e as Map<String, dynamic>)).toList(),
+        linha: j['linha'] as String?,
+      );
+
+  static const vazio = Alertas(total: 0, criticos: 0, avisos: 0, alertas: []);
+
+  /// Quantos dias diferentes têm pelo menos um alerta.
+  int get diasComAlerta => alertas.map((a) => a.data).toSet().length;
+}

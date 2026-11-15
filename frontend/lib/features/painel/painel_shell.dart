@@ -9,6 +9,7 @@ import '../../data/auth_repository.dart';
 import '../../data/indicadores_repository.dart';
 import '../../data/models.dart';
 import '../usuarios/usuarios_page.dart';
+import 'paginas/alertas_page.dart';
 import 'paginas/cumprimento_page.dart';
 import 'paginas/em_construcao_page.dart';
 import 'paginas/financeiro_page.dart';
@@ -103,6 +104,7 @@ class _PainelShellState extends State<PainelShell> {
           filtros: _filtros,
           repository: widget.repository,
           onAbrirLinha: (codigo) => _irPara(Tela.linhas, linha: codigo),
+          onAbrirAlertas: () => _irPara(Tela.alertas),
           onGranularidade: _trocarGranularidade,
         );
       case Tela.monitoramento:
@@ -130,6 +132,7 @@ class _PainelShellState extends State<PainelShell> {
       case Tela.financeiro:
         return FinanceiroPage(key: const ValueKey('tela-financeiro'), filtros: _filtros, repository: widget.repository, onGranularidade: _trocarGranularidade);
       case Tela.alertas:
+        return AlertasPage(key: const ValueKey('tela-alertas'), filtros: _filtros, repository: widget.repository);
       case Tela.relatorios:
         return EmConstrucaoPage(key: ValueKey('tela-${_tela.name}'), tela: _tela);
     }

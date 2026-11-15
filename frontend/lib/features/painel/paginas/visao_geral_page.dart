@@ -17,7 +17,7 @@ import '../widgets/tabela_linhas.dart';
 /// Visão Geral: os quatro indicadores principais, pagantes × gratuidades, FCV, faixas horárias
 /// e o monitoramento por linha (US02 a US05).
 class VisaoGeralPage extends StatefulWidget {
-  const VisaoGeralPage({super.key, required this.filtros, required this.repository, this.onAbrirLinha, this.onGranularidade});
+  const VisaoGeralPage({super.key, required this.filtros, required this.repository, this.onAbrirLinha, this.onAbrirAlertas, this.onGranularidade});
 
   final FiltrosPainel filtros;
   final IndicadoresRepository repository;
@@ -28,6 +28,9 @@ class VisaoGeralPage extends StatefulWidget {
   /// Chamado ao clicar em uma linha da tabela de monitoramento.
   final ValueChanged<String>? onAbrirLinha;
 
+  /// Chamado pelo "Ver alertas" da faixa de destaque (US08).
+  final VoidCallback? onAbrirAlertas;
+
   @override
   State<VisaoGeralPage> createState() => _VisaoGeralPageState();
 }
@@ -36,6 +39,7 @@ class _VisaoGeralPageState extends State<VisaoGeralPage> {
   Indicadores? _dados;
   DetalhesOperacao _detalhes = DetalhesOperacao.vazio;
   List<ResumoLinha> _linhas = const [];
+  Alertas? _alertas;
   String? _erro;
   bool _carregando = true;
   String _busca = '';
@@ -65,7 +69,9 @@ class _VisaoGeralPageState extends State<VisaoGeralPage> {
     setState(() {
       _carregando = true;
       _erro = null;
+      _alertas = null;
     });
+    _carregarAlertas(f);
     try {
       final resultados = await Future.wait<Object>([
         widget.repository.obter(inicio: f.inicio, fim: f.fim, granularidade: f.granularidade, linha: f.linha, comparar: true),
@@ -85,12 +91,23 @@ class _VisaoGeralPageState extends State<VisaoGeralPage> {
     }
   }
 
+  /// Os alertas chegam à parte: se a rota falhar, o painel continua normal, só sem a faixa.
+  Future<void> _carregarAlertas(FiltrosPainel f) async {
+    try {
+      final a = await widget.repository.alertas(inicio: f.inicio, fim: f.fim, linha: f.linha);
+      if (mounted && f == widget.filtros) setState(() => _alertas = a);
+    } catch (_) {
+      // sem destaque de alertas
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final f = widget.filtros;
     return LayoutBuilder(builder: (context, c) {
       final faixa = faixaDeLargura(c.maxWidth);
       final d = _dados;
+      final a = _alertas;
       final conteudo = <Widget>[
         CabecalhoTela(
           titulo: f.linha == null ? 'Painel consolidado de desempenho' : 'Linha ${f.linha} no período',
@@ -98,6 +115,10 @@ class _VisaoGeralPageState extends State<VisaoGeralPage> {
           acoes: [if (d != null && !d.semDados) const Etiqueta('● Dados atualizados', tom: TomEtiqueta.ok)],
         ),
         const SizedBox(height: 18),
+        if (a != null && a.total > 0 && !_carregando && _erro == null) ...[
+          FaixaAlertas(alertas: a, onVer: widget.onAbrirAlertas),
+          const SizedBox(height: 18),
+        ],
         if (_erro != null) MensagemErro(_erro!),
         if (_carregando) const Carregando(),
         if (!_carregando && _erro == null && d != null) ..._corpo(faixa, d),
@@ -312,7 +333,7 @@ class _CartaoCumprimento extends StatelessWidget {
       subtitulo: 'Realizadas ÷ programadas',
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         if (totais.fcv == null)
-          Text('Sem dados', key: const Key('kpi-FCV'), style: TextStyle(color: Cores.texto2, fontWeight: FontWeight.w600))
+          Text('Sem dados', key: Key('kpi-FCV'), style: TextStyle(color: Cores.texto2, fontWeight: FontWeight.w600))
         else
           Wrap(crossAxisAlignment: WrapCrossAlignment.end, spacing: 8, children: [
             Text(fmtPercentual(totais.fcv!), key: const Key('kpi-FCV'), style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w700, color: Cores.verde, height: 1.1)),

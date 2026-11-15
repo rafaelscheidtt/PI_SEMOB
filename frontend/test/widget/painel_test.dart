@@ -117,10 +117,10 @@ void main() {
     janela(tester, 1400);
     await tester.pumpWidget(app(RepositorioFalso(comDados)));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('menu-alertas')));
+    await tester.tap(find.byKey(const Key('menu-relatorios')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('tela-visaoGeral')), findsOneWidget);
-    expect(find.text('Sprint 2'), findsNWidgets(2));
+    expect(find.text('Sprint 2'), findsNWidgets(1));
   });
 
   testWidgets('US06 tela expandida tem o menu fixo e quatro colunas de cartões', (tester) async {

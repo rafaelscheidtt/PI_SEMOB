@@ -11,7 +11,7 @@ enum Tela {
   passageiros('Passageiros', Icons.groups_outlined),
   importacao('Importação de relatórios', Icons.upload_file_outlined),
   financeiro('Financeiro', Icons.payments_outlined, gestao: true),
-  alertas('Alertas', Icons.notifications_outlined, gestao: true, emConstrucao: true),
+  alertas('Alertas', Icons.notifications_outlined, gestao: true),
   relatorios('Relatórios', Icons.picture_as_pdf_outlined, gestao: true, emConstrucao: true),
   usuarios('Usuários', Icons.manage_accounts_outlined, administracao: true);
 

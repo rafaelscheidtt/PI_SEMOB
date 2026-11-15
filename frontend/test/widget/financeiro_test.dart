@@ -69,7 +69,7 @@ void main() {
     await tester.tap(find.byKey(const Key('menu-financeiro')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('tela-financeiro')), findsOneWidget);
-    expect(find.text('Sprint 2'), findsNWidgets(2));
+    expect(find.text('Sprint 2'), findsNWidgets(1));
   });
 
   testWidgets('US06 Financeiro em tela de celular fica em uma coluna', (tester) async {
