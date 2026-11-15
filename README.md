@@ -77,7 +77,7 @@ papel de cada um:
 |-------|---------------|
 | administrador | tudo, mais a tela Usuários |
 | gestor | o painel completo e a importação de relatórios |
-| executivo | só a visão resumida: Visão Geral, Cumprimento de viagens e Passageiros |
+| executivo | a Visão executiva (tela inicial) e as telas de indicadores; não importa relatórios, não vê o detalhe por linha e não cadastra ninguém |
 
 Como o banco do Atlas é um só pra todo o grupo, o administrador criado por uma pessoa vale pra
 todas. Com o token em mãos (resposta do `POST /login`), o botão Authorize do `/docs` libera as
@@ -110,16 +110,16 @@ do rodapé do menu (a escolha fica guardada no aparelho).
 | Tela | O que mostra |
 |------|--------------|
 | Visão Geral | km, viagens, passageiros e gratuidades com a variação em relação ao período anterior, pagantes × gratuidades, cumprimento por turno, viagens por faixa horária e a tabela de monitoramento por linha |
-| Monitoramento | tela para TV: seis números grandes (km, viagens, cumprimento, passageiros, gratuidades e viagens não realizadas) com a variação, mais o cumprimento por turno; atualiza sozinha a cada 5 minutos |
+| Monitoramento | tela para TV: seis números grandes (km, viagens, cumprimento, passageiros, gratuidades e alertas críticos) com a variação, mais os alertas críticos em destaque e o cumprimento por turno; atualiza sozinha a cada 5 minutos |
 | Linhas | a mesma tabela com busca e, ao clicar, o detalhamento da linha: indicadores, faixa horária e ocorrências de viagem |
 | Cumprimento de viagens | FCV do período, por turno e ao longo do tempo, com os períodos em que faltaram mais viagens |
 | Passageiros | pagantes, gratuidades, total e média por viagem (sempre do sistema inteiro) |
 | Importação de relatórios | envio do pacote (HTML ou .zip) e histórico do que já foi importado (gestor e administrador) |
 | Financeiro | vendas, utilização, crédito circulante e saldo de créditos da bilhetagem, em reais, com o aviso do Tarifa Zero para períodos sem bilhetagem |
 | Alertas | dias fora do padrão: cumprimento abaixo de 95%/90% (RN09), desvio acima de 20%/35% do mesmo dia da semana nas últimas 8 semanas (RN10) e excesso de ocorrências (RN11); a Visão Geral mostra uma faixa com o total |
+| Visão executiva | resumo para o secretário apresentar: seis destaques com a variação, comparativo com o período anterior e os alertas críticos; é a tela inicial do papel executivo |
+| Relatórios | exporta o painel do período em PDF, com as seções escolhidas (indicadores, cumprimento, financeiro, alertas e linhas) |
 | Usuários | cadastro, papel e desativação de usuários (só o administrador) |
-
-Relatórios aparece no menu marcada como Sprint 2.
 
 ## Relatórios importados
 

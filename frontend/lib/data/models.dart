@@ -386,7 +386,7 @@ class ArquivoEnvio {
 enum Papel {
   administrador('administrador', 'Administrador', 'Tudo, mais o cadastro de usuários'),
   gestor('gestor', 'Gestor', 'Painel completo e importação de relatórios'),
-  executivo('executivo', 'Executivo', 'Só a visão resumida: indicadores, cumprimento e passageiros');
+  executivo('executivo', 'Executivo', 'Visão executiva e as telas de indicadores, sem importação e sem cadastro');
 
   const Papel(this.valorApi, this.rotulo, this.descricao);
   final String valorApi;

@@ -10,6 +10,7 @@ import 'data/indicadores_repository.dart';
 import 'data/models.dart';
 import 'features/login/login_page.dart';
 import 'features/painel/painel_shell.dart';
+import 'features/painel/telas.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -144,6 +145,7 @@ class _AppRaizState extends State<AppRaiz> {
       onSair: _sair,
       tema: widget.tema,
       menuRetratil: widget.menuRetratil,
+      telaInicial: Tela.inicialPara(u.papel),
     );
   }
 }

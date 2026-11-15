@@ -29,13 +29,21 @@ void main() {
     expect(tester.widget<Text>(find.byKey(const Key('monitor-Cumprimento de viagens'))).data, '98,0');
     expect(tester.widget<Text>(find.byKey(const Key('monitor-Passageiros'))).data, '1.500');
     expect(tester.widget<Text>(find.byKey(const Key('monitor-Gratuidades'))).data, '20,0');
-    expect(tester.widget<Text>(find.byKey(const Key('monitor-Viagens não realizadas'))).data, '2');
+    expect(tester.widget<Text>(find.byKey(const Key('monitor-Alertas críticos'))).data, '1');
     expect(find.text('▲ 25,0% vs. período anterior'), findsOneWidget); // km 1.000 -> 1.250
-    expect(find.byKey(const Key('monitor-ok')), findsOneWidget);
-    expect(find.byKey(const Key('monitor-piores')), findsOneWidget);
+    expect(find.byKey(const Key('monitor-alerta-fcv')), findsOneWidget); // alerta crítico em destaque no rodapé
     expect(find.textContaining('atualizado às'), findsOneWidget);
     expect(find.byType(SingleChildScrollView), findsNothing); // no desktop cabe na tela, sem rolagem
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('US14 sem alertas críticos o rodapé mostra o cumprimento', (tester) async {
+    janela(tester, 1400);
+    await tester.pumpWidget(app(RepositorioFalso(comDados, respostaAlertas: Alertas.vazio), tela: Tela.monitoramento));
+    await tester.pumpAndSettle();
+    expect(tester.widget<Text>(find.byKey(const Key('monitor-Alertas críticos'))).data, '0');
+    expect(find.byKey(const Key('monitor-ok')), findsOneWidget);
+    expect(find.byKey(const Key('monitor-piores')), findsOneWidget);
   });
 
   testWidgets('RN06 Monitoramento sem dados não mostra zero', (tester) async {

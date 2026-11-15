@@ -28,7 +28,7 @@ class _Tons {
 
 /// Monitoramento (US14): uma tela só, pensada para ficar aberta numa TV na sala da SEMOB.
 /// Números grandes, poucos elementos e contraste alto, para quem passa longe conseguir ler.
-/// Atualiza sozinha de tempos em tempos. (Os alertas entram aqui quando a US08 chegar.)
+/// Atualiza sozinha de tempos em tempos e destaca os alertas críticos do período (US08).
 class MonitoramentoPage extends StatefulWidget {
   const MonitoramentoPage({super.key, required this.filtros, required this.repository, this.intervaloAtualizacao = const Duration(minutes: 5)});
 
@@ -45,6 +45,7 @@ class MonitoramentoPage extends StatefulWidget {
 class _MonitoramentoPageState extends State<MonitoramentoPage> {
   Indicadores? _dados;
   DetalhesOperacao _detalhes = DetalhesOperacao.vazio;
+  Alertas _alertas = Alertas.vazio;
   DateTime? _atualizadoEm;
   String? _erro;
   bool _carregando = true;
@@ -85,11 +86,13 @@ class _MonitoramentoPageState extends State<MonitoramentoPage> {
       final resultados = await Future.wait<Object>([
         widget.repository.obter(inicio: f.inicio, fim: f.fim, granularidade: Granularidade.dia, linha: f.linha, comparar: true),
         widget.repository.detalhes(inicio: f.inicio, fim: f.fim, linha: f.linha),
+        widget.repository.alertas(inicio: f.inicio, fim: f.fim, linha: f.linha),
       ]);
       if (!mounted || f != widget.filtros) return;
       setState(() {
         _dados = resultados[0] as Indicadores;
         _detalhes = resultados[1] as DetalhesOperacao;
+        _alertas = resultados[2] as Alertas;
         _atualizadoEm = DateTime.now();
         _erro = null;
       });
@@ -114,7 +117,7 @@ class _MonitoramentoPageState extends State<MonitoramentoPage> {
       } else if (d.semDados) {
         corpo = const Center(child: _SemDados());
       } else {
-        corpo = _Paineis(dados: d, detalhes: _detalhes, faixa: faixa);
+        corpo = _Paineis(dados: d, detalhes: _detalhes, alertas: _alertas, faixa: faixa);
       }
       return Container(
         color: Cores.fundo,
@@ -178,10 +181,11 @@ class _SemDados extends StatelessWidget {
 
 /// Os seis painéis grandes mais a faixa de rodapé. No desktop ocupam a altura toda; no celular rolam.
 class _Paineis extends StatelessWidget {
-  const _Paineis({required this.dados, required this.detalhes, required this.faixa});
+  const _Paineis({required this.dados, required this.detalhes, required this.alertas, required this.faixa});
 
   final Indicadores dados;
   final DetalhesOperacao detalhes;
+  final Alertas alertas;
   final FaixaLargura faixa;
 
   @override
@@ -191,7 +195,6 @@ class _Paineis extends StatelessWidget {
     final gratuidades = t.total == null || t.naoPagantes == null || t.total == 0 ? null : t.naoPagantes! / t.total! * 100;
     final gratuidadesAnt = ant == null || ant.total == null || ant.naoPagantes == null || ant.total == 0 ? null : ant.naoPagantes! / ant.total! * 100;
     final fcvOk = t.fcv == null || t.fcv! >= 95;
-    final naoRealizadas = t.viagensNaoRealizadas;
 
     final paineis = <_Painel>[
       _Painel(titulo: 'Quilometragem', valor: fmtInteiro(t.kmTotal.round()), unidade: 'km', variacao: variacaoPercentual(t.kmTotal, ant?.kmTotal)),
@@ -200,17 +203,18 @@ class _Paineis extends StatelessWidget {
       _Painel(titulo: 'Passageiros', valor: t.total == null ? null : fmtInteiro(t.total!), detalhe: t.total == null ? 'sem bilhetagem no período' : null, variacao: variacaoPercentual(t.total, ant?.total)),
       _Painel(titulo: 'Gratuidades', valor: gratuidades == null ? null : fmtDecimal(gratuidades), unidade: gratuidades == null ? null : '%', detalhe: t.naoPagantes == null ? null : '${fmtInteiro(t.naoPagantes!)} passageiros', variacao: variacaoPercentual(gratuidades, gratuidadesAnt), cor: _Tons.ambar),
       _Painel(
-        titulo: 'Viagens não realizadas',
-        valor: naoRealizadas == null ? null : fmtInteiro(naoRealizadas),
-        detalhe: naoRealizadas == null ? 'sem o relatório de FCV' : (naoRealizadas == 0 ? 'todas as viagens programadas saíram' : 'programadas que não saíram'),
-        variacao: variacaoPercentual(naoRealizadas, ant?.viagensNaoRealizadas),
-        quedaEBoa: true,
-        cor: naoRealizadas == null || naoRealizadas == 0 ? _Tons.verde : _Tons.vermelho,
+        titulo: 'Alertas críticos',
+        valor: fmtInteiro(alertas.criticos),
+        detalhe: alertas.total == 0
+            ? 'operação dentro do padrão'
+            : '${alertas.total} ${alertas.total == 1 ? 'alerta' : 'alertas'} em ${alertas.diasComAlerta} ${alertas.diasComAlerta == 1 ? 'dia' : 'dias'}',
+        cor: alertas.criticos == 0 ? _Tons.verde : _Tons.vermelho,
       ),
     ];
 
     final piores = [...dados.serie.where((p) => p.fcv != null)]..sort((a, b) => a.fcv!.compareTo(b.fcv!));
-    final rodape = _Rodape(turnos: detalhes.turnos, piores: piores.take(3).toList(), fcvOk: fcvOk, compacto: faixa == FaixaLargura.compacto);
+    final criticos = alertas.alertas.where((a) => a.severidade == Severidade.critico).take(3).toList();
+    final rodape = _Rodape(turnos: detalhes.turnos, piores: piores.take(3).toList(), criticos: criticos, fcvOk: fcvOk, compacto: faixa == FaixaLargura.compacto);
 
     if (faixa == FaixaLargura.expandido) {
       // três colunas por duas linhas, preenchendo a altura disponível
@@ -245,7 +249,7 @@ class _Paineis extends StatelessWidget {
 
 /// Um painel grande: rótulo, número enorme (que encolhe para caber) e uma linha de apoio.
 class _Painel extends StatelessWidget {
-  const _Painel({required this.titulo, required this.valor, this.unidade, this.detalhe, this.variacao, this.cor, this.quedaEBoa = false});
+  const _Painel({required this.titulo, required this.valor, this.unidade, this.detalhe, this.variacao, this.cor});
 
   final String titulo;
   final String? valor;
@@ -256,14 +260,12 @@ class _Painel extends StatelessWidget {
   /// Cor do número; sem ela, a cor de texto do tema.
   final Color? cor;
 
-  /// Para indicadores em que cair é bom (viagens não realizadas), inverte as cores da variação.
-  final bool quedaEBoa;
 
   @override
   Widget build(BuildContext context) {
     final v = variacao;
     final subiu = v != null && v > 0;
-    final bom = quedaEBoa ? !subiu : subiu;
+    final bom = subiu;
     final corValor = cor ?? _Tons.texto;
     final textoVariacao = v == null ? null : '${subiu ? '▲' : (v < 0 ? '▼' : '●')} ${fmtDecimal(v.abs())}% vs. período anterior';
     final corVariacao = v == null || v.abs() < 0.05 ? _Tons.rotulo : (bom ? _Tons.verde : _Tons.vermelho);
@@ -302,35 +304,46 @@ class _Painel extends StatelessWidget {
   }
 }
 
-/// Rodapé: cumprimento por turno e os períodos com menor cumprimento.
+/// Rodapé: alertas críticos do período (ou o cumprimento, quando não há nenhum) e o cumprimento por turno.
 class _Rodape extends StatelessWidget {
-  const _Rodape({required this.turnos, required this.piores, required this.fcvOk, required this.compacto});
+  const _Rodape({required this.turnos, required this.piores, required this.criticos, required this.fcvOk, required this.compacto});
 
   final List<Turno> turnos;
   final List<PontoIndicador> piores;
+  final List<Alerta> criticos;
   final bool fcvOk;
   final bool compacto;
 
   @override
   Widget build(BuildContext context) {
+    final ok = criticos.isEmpty && fcvOk;
     final resumo = Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Icon(fcvOk ? Icons.check_circle_outline : Icons.warning_amber_rounded, color: fcvOk ? _Tons.verde : _Tons.vermelho, size: 32),
+      Icon(ok ? Icons.check_circle_outline : Icons.warning_amber_rounded, color: ok ? _Tons.verde : _Tons.vermelho, size: 32),
       const SizedBox(width: 14),
       Expanded(
-        child: piores.isEmpty
-            ? Text('Sem o relatório de cumprimento no período', key: const Key('monitor-ok'), style: TextStyle(color: _Tons.texto, fontSize: 22, fontWeight: FontWeight.w600))
-            : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(fcvOk ? 'Cumprimento dentro da meta de 95% no período' : 'Cumprimento abaixo da meta de 95% no período',
-                    key: const Key('monitor-ok'), style: TextStyle(color: _Tons.texto, fontSize: 22, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 4),
-                Text(
-                  'Menor cumprimento: ${piores.map((p) => '${rotuloPeriodo(p.periodo)} (${fmtPercentual(p.fcv!)})').join(' · ')}',
-                  key: const Key('monitor-piores'),
-                  style: TextStyle(color: _Tons.rotulo, fontSize: 18),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ]),
+        child: criticos.isNotEmpty
+            ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                for (final a in criticos)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text('${fmtData(a.data)}${a.linha == null ? '' : ' · linha ${a.linha}'} — ${a.mensagem}',
+                        key: Key('monitor-alerta-${a.indicador}'), style: TextStyle(color: _Tons.texto, fontSize: 20, fontWeight: FontWeight.w600), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  ),
+              ])
+            : piores.isEmpty
+                ? Text('Sem o relatório de cumprimento no período', key: const Key('monitor-ok'), style: TextStyle(color: _Tons.texto, fontSize: 22, fontWeight: FontWeight.w600))
+                : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(fcvOk ? 'Operação dentro do padrão · cumprimento na meta de 95%' : 'Cumprimento abaixo da meta de 95% no período',
+                        key: const Key('monitor-ok'), style: TextStyle(color: _Tons.texto, fontSize: 22, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Menor cumprimento: ${piores.map((p) => '${rotuloPeriodo(p.periodo)} (${fmtPercentual(p.fcv!)})').join(' · ')}',
+                      key: const Key('monitor-piores'),
+                      style: TextStyle(color: _Tons.rotulo, fontSize: 18),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ]),
       ),
     ]);
     final porTurno = turnos.isEmpty

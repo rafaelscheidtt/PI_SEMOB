@@ -10,6 +10,7 @@ enum Tela {
   cumprimento('Cumprimento de viagens', Icons.task_alt_outlined),
   passageiros('Passageiros', Icons.groups_outlined),
   importacao('Importação de relatórios', Icons.upload_file_outlined),
+  executiva('Visão executiva', Icons.insights_outlined, gestao: true),
   financeiro('Financeiro', Icons.payments_outlined, gestao: true),
   alertas('Alertas', Icons.notifications_outlined, gestao: true),
   relatorios('Relatórios', Icons.picture_as_pdf_outlined, gestao: true),
@@ -26,7 +27,8 @@ enum Tela {
   /// Grupo "Administração" do menu, só para o administrador (US13).
   final bool administracao;
 
-  /// O que cada papel enxerga no menu (US11). O executivo vê só a visão resumida.
+  /// O que cada papel enxerga no menu (US11). O executivo não importa relatórios,
+  /// não vê o detalhe por linha e não cadastra ninguém.
   bool permitidaPara(Papel papel) {
     switch (papel) {
       case Papel.administrador:
@@ -34,9 +36,12 @@ enum Tela {
       case Papel.gestor:
         return !administracao;
       case Papel.executivo:
-        return this == visaoGeral || this == monitoramento || this == cumprimento || this == passageiros;
+        return this != linhas && this != importacao && !administracao;
     }
   }
 
   static List<Tela> permitidas(Papel papel) => values.where((t) => t.permitidaPara(papel)).toList();
+
+  /// Tela em que cada papel cai depois do login (US09: o executivo vai direto para a visão executiva).
+  static Tela inicialPara(Papel papel) => papel == Papel.executivo ? executiva : visaoGeral;
 }

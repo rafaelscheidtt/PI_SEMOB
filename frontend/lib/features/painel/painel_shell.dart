@@ -14,6 +14,7 @@ import '../relatorios/relatorios_page.dart';
 import '../usuarios/usuarios_page.dart';
 import 'paginas/alertas_page.dart';
 import 'paginas/cumprimento_page.dart';
+import 'paginas/executiva_page.dart';
 import 'paginas/financeiro_page.dart';
 import 'paginas/importacao_page.dart';
 import 'paginas/linhas_page.dart';
@@ -136,6 +137,13 @@ class _PainelShellState extends State<PainelShell> {
         return ImportacaoPage(key: const ValueKey('tela-importacao'), repository: widget.repository);
       case Tela.usuarios:
         return UsuariosPage(key: const ValueKey('tela-usuarios'), repository: widget.authRepository!, usuarioLogado: widget.usuario);
+      case Tela.executiva:
+        return ExecutivaPage(
+          key: const ValueKey('tela-executiva'),
+          filtros: _filtros,
+          repository: widget.repository,
+          onAbrirAlertas: () => _irPara(Tela.alertas),
+        );
       case Tela.financeiro:
         return FinanceiroPage(key: const ValueKey('tela-financeiro'), filtros: _filtros, repository: widget.repository, onGranularidade: _trocarGranularidade);
       case Tela.alertas:

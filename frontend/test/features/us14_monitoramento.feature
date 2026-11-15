@@ -5,9 +5,9 @@ Funcionalidade: US14 Tela de monitoramento para TV
   Cenário: números grandes numa tela só
     Dado que o período tem dados de operação
     Quando o gestor abre o Monitoramento no computador
-    Então vê seis painéis: quilometragem, viagens, cumprimento, passageiros, gratuidades e viagens não realizadas
+    Então vê seis painéis: quilometragem, viagens, cumprimento, passageiros, gratuidades e alertas críticos
     E cada painel mostra a variação em relação ao período anterior
-    E o rodapé mostra o cumprimento por turno e os períodos com menor cumprimento, sem precisar rolar
+    E os alertas críticos aparecem em destaque no rodapé, com o cumprimento por turno, sem precisar rolar
 
   Cenário: atualização automática
     Dado que a tela Monitoramento está aberta
