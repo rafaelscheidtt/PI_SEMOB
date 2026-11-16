@@ -122,4 +122,14 @@ void main() {
     expect(r.relatorios.single.arquivo, 'Mensal_202608.html');
     expect(r.atualizados, 31);
   });
+
+  test('Usuario lê a foto do perfil e monta as iniciais do nome', () {
+    final u = Usuario.fromJson({'_id': 'u1', 'nome': '  ana maria  admin ', 'email': 'a@b', 'papel': 'gestor', 'foto': 'data:image/png;base64,AAAA'});
+    expect(u.foto, 'data:image/png;base64,AAAA');
+    expect(u.iniciais, 'AA');
+    final semFoto = Usuario.fromJson({'_id': 'u2', 'nome': 'Gil', 'email': 'g@b', 'papel': 'gestor', 'foto': ''});
+    expect(semFoto.foto, isNull);
+    expect(semFoto.iniciais, 'G');
+    expect(const Usuario(id: 'x', nome: '', email: 'x@y', papel: Papel.executivo).iniciais, '?');
+  });
 }

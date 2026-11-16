@@ -398,7 +398,7 @@ enum Papel {
 
 /// Usuário do painel (GET /me, GET /usuarios).
 class Usuario {
-  const Usuario({required this.id, required this.nome, required this.email, required this.papel, this.ativo = true});
+  const Usuario({required this.id, required this.nome, required this.email, required this.papel, this.ativo = true, this.foto});
 
   final String id;
   final String nome;
@@ -406,12 +406,24 @@ class Usuario {
   final Papel papel;
   final bool ativo;
 
+  /// Foto do perfil como data URL ("data:image/png;base64,..."); `null` para quem não pôs foto.
+  final String? foto;
+
+  /// Primeira letra do primeiro e do último nome ("Ana Maria Admin" -> "AA"), para o avatar sem foto.
+  String get iniciais {
+    final partes = nome.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    if (partes.isEmpty) return '?';
+    final primeira = partes.first.substring(0, 1);
+    return (partes.length == 1 ? primeira : primeira + partes.last.substring(0, 1)).toUpperCase();
+  }
+
   factory Usuario.fromJson(Map<String, dynamic> j) => Usuario(
         id: (j['_id'] ?? j['id'] ?? '') as String,
         nome: (j['nome'] ?? '') as String,
         email: (j['email'] ?? '') as String,
         papel: Papel.daApi(j['papel'] as String?),
         ativo: (j['ativo'] as bool?) ?? true,
+        foto: (j['foto'] as String?)?.isEmpty ?? true ? null : j['foto'] as String,
       );
 }
 

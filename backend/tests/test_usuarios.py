@@ -119,3 +119,50 @@ def test_cli_cria_o_primeiro_admin_uma_vez_so(db, monkeypatch, capsys):
     assert cli(["cli", "criar-admin", "Outro", "outro@semob.teste", "segredo1"]) == 1  # já existe usuário
     assert db.usuarios.count_documents({}) == 1
     assert cli(["cli"]) == 2
+
+
+# 1 pixel em PNG, só para ter uma imagem de verdade nos testes do perfil
+FOTO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg=="
+
+
+def test_us13_usuario_muda_o_proprio_nome_e_a_foto(client):
+    r = client.put("/me", json={"nome": "  Ana Maria Admin ", "foto": FOTO})
+    assert r.status_code == 200, r.text
+    assert r.json()["nome"] == "Ana Maria Admin" and r.json()["foto"] == FOTO
+    assert "senha_hash" not in r.json()
+    assert client.get("/me").json()["foto"] == FOTO
+
+    r = client.put("/me", json={"foto": ""})  # texto vazio apaga
+    assert r.status_code == 200 and "foto" not in r.json()
+    assert client.get("/me").json()["nome"] == "Ana Maria Admin"
+
+
+def test_us13_perfil_recusa_foto_invalida_e_nome_vazio(client):
+    assert client.put("/me", json={"foto": "data:text/html;base64,PGI+b2k8L2I+"}).status_code == 422
+    assert client.put("/me", json={"foto": "data:image/png;base64,isto nao e base64!"}).status_code == 422
+    assert client.put("/me", json={"foto": "data:image/png;base64," + "A" * 200_000}).status_code == 422
+    assert client.put("/me", json={"nome": "   "}).status_code == 422
+    assert "foto" not in client.get("/me").json()
+
+
+def test_us13_trocar_a_propria_senha_exige_a_senha_atual(client, anonimo):
+    r = client.put("/me", json={"senha_atual": "errada", "nova_senha": "novasenha1"})
+    assert r.status_code == 422 and "senha atual" in r.json()["detail"]
+    assert client.put("/me", json={"nova_senha": "novasenha1"}).status_code == 422
+    assert client.put("/me", json={"senha_atual": ADMIN["senha"], "nova_senha": "123"}).status_code == 422  # curta
+
+    assert client.put("/me", json={"senha_atual": ADMIN["senha"], "nova_senha": "novasenha1"}).status_code == 200
+    assert anonimo.post("/login", json={"email": ADMIN["email"], "senha": ADMIN["senha"]}).status_code == 401
+    assert anonimo.post("/login", json={"email": ADMIN["email"], "senha": "novasenha1"}).status_code == 200
+
+
+def test_us13_perfil_nao_deixa_o_usuario_mudar_o_proprio_papel(client):
+    _criar_gestor(client)
+    cabecalho = {"Authorization": f"Bearer {token_de(client, 'gestor@semob.teste', 'senha123')}"}
+    r = client.put("/me", json={"nome": "Gil G.", "papel": "administrador", "ativo": False}, headers=cabecalho)
+    assert r.status_code == 200
+    assert r.json()["nome"] == "Gil G." and r.json()["papel"] == "gestor" and r.json()["ativo"] is True
+
+
+def test_us13_perfil_exige_login(anonimo):
+    assert anonimo.put("/me", json={"nome": "X"}).status_code == 401

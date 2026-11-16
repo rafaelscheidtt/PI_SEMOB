@@ -1,4 +1,4 @@
-"""Login (US11) e cadastro de usuários pelo administrador (US13)."""
+"""Login (US11), perfil do próprio usuário e cadastro de usuários pelo administrador (US13)."""
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from pymongo.database import Database
@@ -30,6 +30,13 @@ class EdicaoUsuario(BaseModel):
     senha: str | None = None
 
 
+class EdicaoPerfil(BaseModel):
+    nome: str | None = None
+    senha_atual: str | None = None
+    nova_senha: str | None = None
+    foto: str | None = None  # data URL da imagem; texto vazio apaga a foto
+
+
 @router.post("/login")
 def login(credenciais: Credenciais, db: Database = Depends(get_db)):
     """Confere e-mail e senha e devolve o token e o papel do usuário."""
@@ -46,6 +53,22 @@ def login(credenciais: Credenciais, db: Database = Depends(get_db)):
 def quem_sou(usuario: dict = Depends(usuario_atual)):
     """Dados do usuário logado (o app usa para validar a sessão guardada)."""
     return usuario
+
+
+@router.put("/me")
+def editar_perfil(edicao: EdicaoPerfil, db: Database = Depends(get_db), usuario: dict = Depends(usuario_atual)):
+    """O usuário logado muda o próprio nome, a foto e a senha. Papel e situação continuam com o administrador."""
+    if edicao.nome is not None and not edicao.nome.strip():
+        raise HTTPException(status_code=422, detail="Informe o nome")
+    if edicao.nova_senha:
+        guardado = repo.buscar_por_email(db, usuario["email"])
+        # 422 e não 401: o app trata 401 como sessão vencida e voltaria para o login
+        if not edicao.senha_atual or not conferir_senha(edicao.senha_atual, guardado["senha_hash"]):
+            raise HTTPException(status_code=422, detail="A senha atual não confere")
+    try:
+        return repo.atualizar(db, usuario["_id"], nome=edicao.nome, senha=edicao.nova_senha or None, foto=edicao.foto)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @router.get("/usuarios", dependencies=[Depends(exigir_papel("administrador"))])

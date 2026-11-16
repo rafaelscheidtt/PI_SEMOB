@@ -4,6 +4,7 @@ import '../../core/layout.dart';
 import '../../core/tema.dart';
 import '../../data/auth_repository.dart';
 import '../../data/models.dart';
+import '../painel/widgets/avatar_usuario.dart';
 import '../painel/widgets/cartao.dart';
 import '../painel/widgets/estados.dart';
 
@@ -27,6 +28,15 @@ class _UsuariosPageState extends State<UsuariosPage> {
   void initState() {
     super.initState();
     _carregar();
+  }
+
+  @override
+  void didUpdateWidget(UsuariosPage antigo) {
+    super.didUpdateWidget(antigo);
+    // o próprio administrador mudou o nome ou a foto no "Meu perfil": a lista precisa refletir
+    final antes = antigo.usuarioLogado;
+    final agora = widget.usuarioLogado;
+    if (antes.nome != agora.nome || antes.foto != agora.foto) _carregar();
   }
 
   Future<void> _carregar() async {
@@ -104,7 +114,11 @@ class _LinhaUsuario extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
         decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Cores.linha))),
         child: Row(children: [
-          CircleAvatar(radius: 16, backgroundColor: usuario.ativo ? Cores.azulSuave : Cores.fundo, child: Icon(Icons.person, size: 18, color: usuario.ativo ? Cores.azul : Cores.texto2)),
+          // foto do perfil; sem foto, as iniciais (apagadas para quem está desativado)
+          Opacity(
+            opacity: usuario.ativo ? 1 : 0.55,
+            child: AvatarUsuario.de(usuario, raio: 16, fundo: usuario.ativo ? Cores.azulSuave : Cores.fundo, corTexto: usuario.ativo ? Cores.azul : Cores.texto2),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

@@ -143,6 +143,7 @@ class _AppRaizState extends State<AppRaiz> {
       authRepository: widget.auth,
       usuario: u,
       onSair: _sair,
+      onUsuarioAtualizado: (novo) => setState(() => _usuario = novo),
       tema: widget.tema,
       menuRetratil: widget.menuRetratil,
       telaInicial: Tela.inicialPara(u.papel),

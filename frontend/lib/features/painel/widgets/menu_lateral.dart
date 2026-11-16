@@ -4,6 +4,7 @@ import '../../../core/tema.dart';
 import '../../../core/tema_controle.dart';
 import '../../../data/models.dart';
 import '../telas.dart';
+import 'avatar_usuario.dart';
 import 'marca.dart';
 
 /// Largura do menu aberto e recolhido (só ícones).
@@ -23,6 +24,7 @@ class MenuLateral extends StatelessWidget {
     this.largura = larguraMenuAberto,
     this.compacto = false,
     this.tema,
+    this.onPerfil,
   });
 
   final Tela selecionada;
@@ -34,6 +36,9 @@ class MenuLateral extends StatelessWidget {
 
   /// Modo claro/escuro; com ele aparece o botão de alternar no rodapé.
   final ControleTema? tema;
+
+  /// Abre "Meu perfil" ao tocar no nome ou na foto do rodapé; sem ele o rodapé não é clicável.
+  final VoidCallback? onPerfil;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +69,7 @@ class MenuLateral extends StatelessWidget {
             for (final t in administracao) item(t),
           ],
           const Spacer(),
-          _Usuario(usuario: usuario, onSair: onSair, compacto: compacto, tema: tema),
+          _Usuario(usuario: usuario, onSair: onSair, compacto: compacto, tema: tema, onPerfil: onPerfil),
         ],
       ),
     );
@@ -74,13 +79,14 @@ class MenuLateral extends StatelessWidget {
 /// Menu que fica recolhido (só ícones) e abre quando o mouse passa por cima, para não
 /// ocupar a tela enquanto não está em uso (US06). Em telas de toque os ícones já navegam.
 class MenuRetratil extends StatefulWidget {
-  const MenuRetratil({super.key, required this.selecionada, required this.onSelecionar, required this.usuario, required this.onSair, this.tema});
+  const MenuRetratil({super.key, required this.selecionada, required this.onSelecionar, required this.usuario, required this.onSair, this.tema, this.onPerfil});
 
   final Tela selecionada;
   final ValueChanged<Tela> onSelecionar;
   final Usuario usuario;
   final VoidCallback onSair;
   final ControleTema? tema;
+  final VoidCallback? onPerfil;
 
   @override
   State<MenuRetratil> createState() => _MenuRetratilState();
@@ -113,6 +119,7 @@ class _MenuRetratilState extends State<MenuRetratil> {
               usuario: widget.usuario,
               onSair: widget.onSair,
               tema: widget.tema,
+              onPerfil: widget.onPerfil,
               largura: _aberto ? larguraMenuAberto : larguraMenuRecolhido,
               compacto: !_aberto,
             ),
@@ -257,12 +264,13 @@ class _ItemMenu extends StatelessWidget {
 const _duracao = Duration(milliseconds: 180);
 
 class _Usuario extends StatelessWidget {
-  const _Usuario({required this.usuario, required this.onSair, this.compacto = false, this.tema});
+  const _Usuario({required this.usuario, required this.onSair, this.compacto = false, this.tema, this.onPerfil});
 
   final Usuario usuario;
   final VoidCallback onSair;
   final bool compacto;
   final ControleTema? tema;
+  final VoidCallback? onPerfil;
 
   @override
   Widget build(BuildContext context) {
@@ -285,6 +293,20 @@ class _Usuario extends StatelessWidget {
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
     );
+    final avatar = AvatarUsuario.de(usuario, raio: 16, fundo: Cores.menuEtiqueta, corTexto: Colors.white);
+    // a foto e o nome abrem "Meu perfil"
+    Widget clicavel(Widget filho, {BorderRadius? raio}) => onPerfil == null
+        ? filho
+        : Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              key: const Key('menu-perfil'),
+              onTap: onPerfil,
+              borderRadius: raio ?? BorderRadius.circular(7),
+              hoverColor: Colors.white.withValues(alpha: 0.06),
+              child: filho,
+            ),
+          );
     if (compacto) {
       return Container(
         padding: const EdgeInsets.only(top: 10),
@@ -292,25 +314,38 @@ class _Usuario extends StatelessWidget {
         child: Column(children: [
           Tooltip(
             message: '${usuario.nome} · ${usuario.papel.rotulo}',
-            child: const CircleAvatar(radius: 16, backgroundColor: Cores.menuEtiqueta, child: Icon(Icons.person, size: 18, color: Cores.menuTexto)),
+            child: clicavel(Padding(padding: const EdgeInsets.all(2), child: avatar), raio: BorderRadius.circular(20)),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           if (botaoTema != null) botaoTema,
           sair,
         ]),
       );
     }
     return Container(
-      padding: const EdgeInsets.only(top: 14),
+      padding: const EdgeInsets.only(top: 10),
       decoration: const BoxDecoration(border: Border(top: BorderSide(color: Cores.menuEtiqueta))),
       child: Row(children: [
-        const CircleAvatar(radius: 16, backgroundColor: Cores.menuEtiqueta, child: Icon(Icons.person, size: 18, color: Cores.menuTexto)),
-        const SizedBox(width: 10),
         Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(usuario.nome, key: const Key('menu-usuario-nome'), style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
-            Text('${usuario.papel.rotulo} · SEMOB', style: const TextStyle(color: Color(0xFF9EA2C7), fontSize: 11.5), maxLines: 1, overflow: TextOverflow.ellipsis),
-          ]),
+          child: Tooltip(
+            message: onPerfil == null ? '' : 'Meu perfil',
+            waitDuration: const Duration(milliseconds: 500),
+            child: clicavel(
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+                child: Row(children: [
+                  avatar,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(usuario.nome, key: const Key('menu-usuario-nome'), style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text('${usuario.papel.rotulo} · SEMOB', style: const TextStyle(color: Color(0xFF9EA2C7), fontSize: 11.5), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ]),
+                  ),
+                ]),
+              ),
+            ),
+          ),
         ),
         if (botaoTema != null) botaoTema,
         sair,

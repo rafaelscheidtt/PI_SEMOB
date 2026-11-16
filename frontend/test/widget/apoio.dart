@@ -9,6 +9,7 @@ import 'package:dashmob/data/indicadores_repository.dart';
 import 'package:dashmob/data/models.dart';
 import 'package:dashmob/features/painel/painel_shell.dart';
 import 'package:dashmob/features/painel/telas.dart';
+import 'package:dashmob/features/perfil/foto.dart';
 import 'package:dashmob/features/relatorios/relatorios_page.dart';
 import 'package:dashmob/main.dart';
 import 'package:flutter/material.dart';
@@ -101,11 +102,15 @@ class AuthFalso implements AuthRepository {
   Usuario? sessaoGuardada;
   int logins = 0;
 
+  /// Quem entrou por último (o "Meu perfil" mexe nele); sem login, o primeiro da lista.
+  Usuario? logado;
+
   @override
   Future<Sessao> login(String email, String senha) async {
     logins++;
     final u = lista.where((u) => u.email == email.trim() && u.ativo).toList();
     if (u.isEmpty || senha != 'senha123') throw ErroApi('E-mail ou senha incorretos');
+    logado = u.first;
     return Sessao(token: 'token-${u.first.id}', usuario: u.first);
   }
 
@@ -135,7 +140,25 @@ class AuthFalso implements AuthRepository {
     lista[i] = novo;
     return novo;
   }
+
+  @override
+  Future<Usuario> atualizarPerfil({String? nome, String? senhaAtual, String? novaSenha, String? foto}) async {
+    final atual = logado ?? sessaoGuardada ?? lista.first;
+    if (novaSenha != null && senhaAtual != 'senha123') throw ErroApi('A senha atual não confere');
+    perfilSalvo = (nome: nome, novaSenha: novaSenha, foto: foto);
+    final novo = Usuario(id: atual.id, nome: nome ?? atual.nome, email: atual.email, papel: atual.papel, ativo: atual.ativo, foto: foto == null ? atual.foto : (foto.isEmpty ? null : foto));
+    final i = lista.indexWhere((u) => u.id == atual.id);
+    if (i >= 0) lista[i] = novo;
+    logado = novo;
+    return novo;
+  }
+
+  /// O que chegou na última chamada de [atualizarPerfil].
+  ({String? nome, String? novaSenha, String? foto})? perfilSalvo;
 }
+
+/// PNG de 1 pixel, como a foto que o seletor devolveria já pronta.
+const fotoDeTeste = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==';
 
 /// Financeiro de exemplo: bilhetagem desde 15/07/2026, duas semanas na série.
 final comFinanceiro = Financeiro(
@@ -190,7 +213,7 @@ final filtrosPadrao = FiltrosPainel(inicio: DateTime(2026, 9, 1), fim: DateTime(
 const _localizacao = [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate];
 
 /// O painel já logado (por padrão como gestor), sem passar pela tela de login.
-Widget app(IndicadoresRepository repo, {FiltrosPainel? filtros, Tela tela = Tela.visaoGeral, Usuario usuario = gestor, AuthRepository? auth, VoidCallback? onSair, bool menuRetratil = false, ControleTema? tema, SalvarPdf? salvarPdf}) => MaterialApp(
+Widget app(IndicadoresRepository repo, {FiltrosPainel? filtros, Tela tela = Tela.visaoGeral, Usuario usuario = gestor, AuthRepository? auth, VoidCallback? onSair, bool menuRetratil = false, ControleTema? tema, SalvarPdf? salvarPdf, EscolherFoto? escolherFoto, ValueChanged<Usuario>? onUsuarioAtualizado}) => MaterialApp(
       locale: const Locale('pt', 'BR'),
       supportedLocales: const [Locale('pt', 'BR')],
       localizationsDelegates: _localizacao,
@@ -209,6 +232,8 @@ Widget app(IndicadoresRepository repo, {FiltrosPainel? filtros, Tela tela = Tela
         intervaloMonitoramento: null,
         salvarPdf: salvarPdf ?? (bytes, nome) async {},
         brasaoPdf: () async => null,
+        escolherFoto: escolherFoto ?? () async => null,
+        onUsuarioAtualizado: onUsuarioAtualizado,
       ),
     );
 

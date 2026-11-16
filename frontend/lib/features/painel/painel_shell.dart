@@ -10,6 +10,8 @@ import '../../core/tema_controle.dart';
 import '../../data/auth_repository.dart';
 import '../../data/indicadores_repository.dart';
 import '../../data/models.dart';
+import '../perfil/foto.dart';
+import '../perfil/perfil_dialog.dart';
 import '../relatorios/relatorios_page.dart';
 import '../usuarios/usuarios_page.dart';
 import 'paginas/alertas_page.dart';
@@ -42,6 +44,8 @@ class PainelShell extends StatefulWidget {
     this.intervaloMonitoramento = const Duration(minutes: 5),
     this.salvarPdf = salvarPdfNoAparelho,
     this.brasaoPdf = carregarBrasao,
+    this.onUsuarioAtualizado,
+    this.escolherFoto = escolherFotoDoAparelho,
   });
 
   final IndicadoresRepository repository;
@@ -64,6 +68,12 @@ class PainelShell extends StatefulWidget {
   /// Como o PDF da tela Relatórios chega ao usuário (nos testes é substituído).
   final SalvarPdf salvarPdf;
   final Future<Uint8List?> Function() brasaoPdf;
+
+  /// Chamado quando o usuário salva o "Meu perfil", para o app passar a mostrar o nome e a foto novos.
+  final ValueChanged<Usuario>? onUsuarioAtualizado;
+
+  /// Como a foto do perfil é escolhida (nos testes é substituída).
+  final EscolherFoto escolherFoto;
 
   @override
   State<PainelShell> createState() => _PainelShellState();
@@ -92,6 +102,13 @@ class _PainelShellState extends State<PainelShell> {
     } catch (_) {
       // sem a lista de linhas o painel continua funcionando com "Todas as linhas"
     }
+  }
+
+  Future<void> _abrirPerfil() async {
+    final auth = widget.authRepository;
+    if (auth == null) return;
+    final atualizado = await abrirPerfil(context, usuario: widget.usuario, repository: auth, escolherFoto: widget.escolherFoto);
+    if (atualizado != null) widget.onUsuarioAtualizado?.call(atualizado);
   }
 
   void _trocarGranularidade(Granularidade g) => setState(() => _filtros = _filtros.copyWith(granularidade: g));
@@ -162,9 +179,10 @@ class _PainelShellState extends State<PainelShell> {
         if (faixa != FaixaLargura.expandido) Navigator.of(context).maybePop();
       }
 
+      final perfil = widget.authRepository == null ? null : _abrirPerfil;
       final menu = faixa == FaixaLargura.expandido && widget.menuRetratil
-          ? MenuRetratil(selecionada: _tela, usuario: widget.usuario, onSair: widget.onSair, onSelecionar: selecionar, tema: widget.tema)
-          : MenuLateral(selecionada: _tela, usuario: widget.usuario, onSair: widget.onSair, onSelecionar: selecionar, tema: widget.tema);
+          ? MenuRetratil(selecionada: _tela, usuario: widget.usuario, onSair: widget.onSair, onSelecionar: selecionar, tema: widget.tema, onPerfil: perfil)
+          : MenuLateral(selecionada: _tela, usuario: widget.usuario, onSair: widget.onSair, onSelecionar: selecionar, tema: widget.tema, onPerfil: perfil);
       final barra = BarraFiltros(
         filtros: _filtros,
         linhas: _linhas,

@@ -15,6 +15,10 @@ abstract class AuthRepository {
   Future<Usuario> criarUsuario({required String nome, required String email, required String senha, required Papel papel});
 
   Future<Usuario> editarUsuario(String id, {String? nome, Papel? papel, bool? ativo, String? senha});
+
+  /// O usuário logado muda os próprios dados. Para trocar a senha vão a atual e a nova;
+  /// em [foto], um data URL troca a foto e um texto vazio apaga a que existe.
+  Future<Usuario> atualizarPerfil({String? nome, String? senhaAtual, String? novaSenha, String? foto});
 }
 
 class AuthRepositoryHttp implements AuthRepository {
@@ -79,6 +83,20 @@ class AuthRepositoryHttp implements AuthRepository {
       return Usuario.fromJson(r.data!);
     } on DioException catch (e) {
       throw _erro(e, 'Não foi possível salvar o usuário');
+    }
+  }
+
+  @override
+  Future<Usuario> atualizarPerfil({String? nome, String? senhaAtual, String? novaSenha, String? foto}) async {
+    try {
+      final r = await _dio.put<Map<String, dynamic>>('/me', data: {
+        if (nome != null) 'nome': nome,
+        if (novaSenha != null && novaSenha.isNotEmpty) ...{'senha_atual': senhaAtual ?? '', 'nova_senha': novaSenha},
+        if (foto != null) 'foto': foto,
+      });
+      return Usuario.fromJson(r.data!);
+    } on DioException catch (e) {
+      throw _erro(e, 'Não foi possível salvar o perfil');
     }
   }
 }
