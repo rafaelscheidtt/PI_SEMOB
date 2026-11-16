@@ -70,7 +70,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
         padding: EdgeInsets.all(compacto ? 14 : 24),
         child: Cartao(
           titulo: 'Usuários do painel',
-          subtitulo: 'Quem pode entrar e o que cada um enxerga',
+          subtitulo: 'Quem pode entrar no painel e com qual perfil',
           acao: FilledButton.icon(
             key: const Key('usuarios-novo'),
             onPressed: () => _abrirFormulario(),
@@ -83,11 +83,6 @@ class _UsuariosPageState extends State<UsuariosPage> {
                   ? MensagemErro(_erro!)
                   : Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                       for (final u in _usuarios) _LinhaUsuario(usuario: u, souEu: u.id == widget.usuarioLogado.id, onTap: () => _abrirFormulario(existente: u)),
-                      const SizedBox(height: 12),
-                      Wrap(spacing: 16, runSpacing: 6, children: [
-                        for (final p in Papel.values)
-                          Text('${p.rotulo}: ${p.descricao}', style: Theme.of(context).textTheme.bodySmall),
-                      ]),
                     ]),
         ),
       );

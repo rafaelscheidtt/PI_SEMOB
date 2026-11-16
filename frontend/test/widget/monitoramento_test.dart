@@ -33,7 +33,8 @@ void main() {
     expect(find.text('▲ 25,0% vs. período anterior'), findsOneWidget); // km 1.000 -> 1.250
     expect(find.byKey(const Key('monitor-alerta-fcv')), findsOneWidget); // alerta crítico em destaque no rodapé
     expect(find.textContaining('atualizado às'), findsOneWidget);
-    expect(find.byType(SingleChildScrollView), findsNothing); // no desktop cabe na tela, sem rolagem
+    // no desktop cabe na tela, sem rolagem (só o menu lateral tem a sua, para janelas baixas)
+    expect(find.descendant(of: find.byKey(const ValueKey('tela-monitoramento')), matching: find.byType(SingleChildScrollView)), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -93,6 +94,37 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.widget<MenuLateral>(find.byType(MenuLateral)).compacto, isTrue);
     expect(tester.getSize(find.byType(MenuLateral)).width, larguraMenuRecolhido);
+  });
+
+  testWidgets('US06 aberto pelo mouse o menu passa por cima do conteúdo; o alfinete trava aberto e aí o conteúdo cede espaço', (tester) async {
+    janela(tester, 1400);
+    await tester.pumpWidget(app(RepositorioFalso(comDados), menuRetratil: true));
+    await tester.pumpAndSettle();
+    double inicioDoConteudo() => tester.getTopLeft(find.byKey(const ValueKey('tela-visaoGeral'))).dx;
+    expect(inicioDoConteudo(), larguraMenuRecolhido);
+    expect(find.byKey(const Key('menu-fixar')), findsNothing); // recolhido, só ícones
+
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: Offset.zero);
+    addTearDown(mouse.removePointer);
+    await mouse.moveTo(tester.getCenter(find.byKey(const Key('menu-passageiros'))));
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(MenuLateral)).width, larguraMenuAberto);
+    expect(inicioDoConteudo(), larguraMenuRecolhido); // o conteúdo não saiu do lugar
+
+    await tester.tap(find.byKey(const Key('menu-fixar')));
+    await tester.pumpAndSettle();
+    expect(inicioDoConteudo(), larguraMenuAberto);
+    await mouse.moveTo(const Offset(900, 500));
+    await tester.pumpAndSettle();
+    expect(tester.widget<MenuLateral>(find.byType(MenuLateral)).compacto, isFalse); // travado: não recolhe
+    expect(find.byKey(const Key('menu-usuario-nome')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('menu-fixar')));
+    await tester.pumpAndSettle();
+    expect(tester.widget<MenuLateral>(find.byType(MenuLateral)).compacto, isTrue); // solto e sem o mouse: recolhe
+    expect(inicioDoConteudo(), larguraMenuRecolhido);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('US06 o botão do menu alterna o modo escuro e os cartões trocam de cor', (tester) async {

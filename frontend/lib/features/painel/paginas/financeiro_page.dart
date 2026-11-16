@@ -149,7 +149,7 @@ class _FinanceiroPageState extends State<FinanceiroPage> {
       KpiCard(
         titulo: 'Crédito circulante',
         valor: fmtMoeda(t.creditoCirculante, semCentavos: true),
-        detalhe: 'vendas − utilização no período (RN12)',
+        detalhe: 'vendas − utilização no período',
         etiqueta: Etiqueta(t.creditoCirculante >= 0 ? 'mais vendido que usado' : 'mais usado que vendido',
             tom: t.creditoCirculante >= 0 ? TomEtiqueta.ok : TomEtiqueta.aviso),
         serie: [for (final p in d.serie) p.creditoCirculante],
@@ -189,7 +189,7 @@ class _FinanceiroPageState extends State<FinanceiroPage> {
       const SizedBox(height: 12),
       Cartao(
         titulo: 'Vendas × Utilização por ${widget.filtros.granularidade.rotulo.toLowerCase()}',
-        subtitulo: 'Em reais. Períodos sem o relatório de saldos ficam em branco, nunca em zero (RN06)',
+        subtitulo: 'Em reais. Períodos sem o relatório de saldos ficam em branco, nunca em zero',
         acao: LegendaSeries(series),
         child: GraficoColunas(rotulos: rotulos, series: series, formato: (v) => fmtMoeda(v, semCentavos: true), altura: 260),
       ),

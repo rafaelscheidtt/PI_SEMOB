@@ -14,9 +14,10 @@ enum Tela {
   financeiro('Financeiro', Icons.payments_outlined, gestao: true),
   alertas('Alertas', Icons.notifications_outlined, gestao: true),
   relatorios('Relatórios', Icons.picture_as_pdf_outlined, gestao: true),
-  usuarios('Usuários', Icons.manage_accounts_outlined, administracao: true);
+  usuarios('Usuários', Icons.manage_accounts_outlined, administracao: true),
+  sobre('Sobre o DashMOB', Icons.info_outline, sistema: true);
 
-  const Tela(this.rotulo, this.icone, {this.gestao = false, this.administracao = false});
+  const Tela(this.rotulo, this.icone, {this.gestao = false, this.administracao = false, this.sistema = false});
 
   final String rotulo;
   final IconData icone;
@@ -27,9 +28,13 @@ enum Tela {
   /// Grupo "Administração" do menu, só para o administrador (US13).
   final bool administracao;
 
+  /// Telas de apoio (Sobre): todo mundo abre, pelo rodapé do menu, e por isso ficam fora da lista de telas.
+  final bool sistema;
+
   /// O que cada papel enxerga no menu (US11). O executivo não importa relatórios,
   /// não vê o detalhe por linha e não cadastra ninguém.
   bool permitidaPara(Papel papel) {
+    if (sistema) return true;
     switch (papel) {
       case Papel.administrador:
         return true;
@@ -41,7 +46,7 @@ enum Tela {
   }
 
   /// Nome do grupo do menu, usado no cabeçalho ("Operação • Visão Geral").
-  String get grupo => administracao ? 'Administração' : (gestao ? 'Gestão' : 'Operação');
+  String get grupo => sistema ? 'Sistema' : (administracao ? 'Administração' : (gestao ? 'Gestão' : 'Operação'));
 
   /// Cor da tela: um detalhe fino no item do menu e embaixo do cabeçalho, para situar quem está navegando.
   /// Todas saem do brasão de São Caetano do Sul (azul, verde, vermelho e o amarelo da coroa), mais o cinza.
@@ -52,7 +57,7 @@ enum Tela {
         Tela.cumprimento || Tela.financeiro => _verde,
         Tela.passageiros => _ouro,
         Tela.alertas => _vermelho,
-        Tela.importacao || Tela.relatorios || Tela.usuarios => _cinza,
+        Tela.importacao || Tela.relatorios || Tela.usuarios || Tela.sobre => _cinza,
       };
 
   static const _azul = Color(0xFF3F66C4); // azul do brasão, um tom mais claro para aparecer no menu
@@ -63,7 +68,8 @@ enum Tela {
   static const _ouro = Color(0xFFA07C00);
   static const _cinza = Color(0xFF5F6673);
 
-  static List<Tela> permitidas(Papel papel) => values.where((t) => t.permitidaPara(papel)).toList();
+  /// As telas que aparecem na lista do menu para o papel.
+  static List<Tela> permitidas(Papel papel) => values.where((t) => !t.sistema && t.permitidaPara(papel)).toList();
 
   /// Tela em que cada papel cai depois do login (US09: o executivo vai direto para a visão executiva).
   static Tela inicialPara(Papel papel) => papel == Papel.executivo ? executiva : visaoGeral;

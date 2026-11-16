@@ -138,7 +138,7 @@ class _PassageirosPageState extends State<PassageirosPage> {
       KpiCard(
         titulo: 'Média de passageiros por viagem',
         valor: t.mediaPorViagem == null ? null : fmtDecimal(t.mediaPorViagem!),
-        detalhe: t.mediaPorViagem == null ? null : 'só nos dias com bilhetagem (RN03)',
+        detalhe: t.mediaPorViagem == null ? null : 'só nos dias com bilhetagem',
         etiqueta: etiqueta(t.mediaPorViagem, ant?.totais.mediaPorViagem),
         serie: [for (final p in d.serie) p.mediaPorViagem ?? 0],
         cor: Cores.verde,
@@ -167,7 +167,7 @@ class _PassageirosPageState extends State<PassageirosPage> {
       const SizedBox(height: 12),
       Cartao(
         titulo: 'Pagantes × Gratuidades por ${widget.filtros.granularidade.rotulo.toLowerCase()}',
-        subtitulo: 'Períodos sem o relatório de passageiros ficam em branco, nunca em zero (RN06)',
+        subtitulo: 'Períodos sem o relatório de passageiros ficam em branco, nunca em zero',
         acao: t.total == null ? null : LegendaSeries(series),
         child: t.total == null
             ? const AvisoSemDados(texto: 'Sem bilhetagem importada para o período')

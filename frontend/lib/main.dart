@@ -8,6 +8,7 @@ import 'core/tema_controle.dart';
 import 'data/auth_repository.dart';
 import 'data/indicadores_repository.dart';
 import 'data/models.dart';
+import 'features/legal/termo_page.dart';
 import 'features/login/login_page.dart';
 import 'features/painel/painel_shell.dart';
 import 'features/painel/telas.dart';
@@ -137,6 +138,17 @@ class _AppRaizState extends State<AppRaiz> {
     }
     final u = _usuario;
     if (u == null) return LoginPage(repository: widget.auth, onEntrou: _entrou, aviso: _aviso, tema: widget.tema);
+    // LGPD: o painel só abre depois que o usuário aceita a versão atual do termo
+    if (u.termoPendente) {
+      return TermoPage(
+        nome: u.nome,
+        onSair: _sair,
+        onAceitar: () async {
+          final aceito = await widget.auth.aceitarTermo();
+          if (mounted) setState(() => _usuario = aceito);
+        },
+      );
+    }
     return PainelShell(
       key: ValueKey('painel-${u.id}'),
       repository: widget.repository,

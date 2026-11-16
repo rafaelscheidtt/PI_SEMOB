@@ -146,12 +146,27 @@ class AuthFalso implements AuthRepository {
     final atual = logado ?? sessaoGuardada ?? lista.first;
     if (novaSenha != null && senhaAtual != 'senha123') throw ErroApi('A senha atual não confere');
     perfilSalvo = (nome: nome, novaSenha: novaSenha, foto: foto);
-    final novo = Usuario(id: atual.id, nome: nome ?? atual.nome, email: atual.email, papel: atual.papel, ativo: atual.ativo, foto: foto == null ? atual.foto : (foto.isEmpty ? null : foto));
+    final novo = Usuario(id: atual.id, nome: nome ?? atual.nome, email: atual.email, papel: atual.papel, ativo: atual.ativo, foto: foto == null ? atual.foto : (foto.isEmpty ? null : foto), termoPendente: atual.termoPendente);
     final i = lista.indexWhere((u) => u.id == atual.id);
     if (i >= 0) lista[i] = novo;
     logado = novo;
     return novo;
   }
+
+  @override
+  Future<Usuario> aceitarTermo() async {
+    if (falharNoTermo) throw ErroApi('Não foi possível registrar o aceite');
+    aceites++;
+    final atual = logado ?? sessaoGuardada ?? lista.first;
+    final novo = Usuario(id: atual.id, nome: atual.nome, email: atual.email, papel: atual.papel, ativo: atual.ativo, foto: atual.foto);
+    final i = lista.indexWhere((u) => u.id == atual.id);
+    if (i >= 0) lista[i] = novo;
+    logado = novo;
+    return novo;
+  }
+
+  int aceites = 0;
+  bool falharNoTermo = false;
 
   /// O que chegou na última chamada de [atualizarPerfil].
   ({String? nome, String? novaSenha, String? foto})? perfilSalvo;
@@ -233,6 +248,7 @@ Widget app(IndicadoresRepository repo, {FiltrosPainel? filtros, Tela tela = Tela
         salvarPdf: salvarPdf ?? (bytes, nome) async {},
         brasaoPdf: () async => null,
         escolherFoto: escolherFoto ?? () async => null,
+        lembrarMenu: false,
         onUsuarioAtualizado: onUsuarioAtualizado,
       ),
     );

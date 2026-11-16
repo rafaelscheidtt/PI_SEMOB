@@ -90,7 +90,7 @@ class _CumprimentoPageState extends State<CumprimentoPage> {
         child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           CabecalhoTela(
             titulo: 'Cumprimento de viagens',
-            subtitulo: '${f.descricaoPeriodo} · ${f.linha == null ? 'todas as linhas' : 'linha ${f.linha}'} · viagens realizadas ÷ programadas (RN08)',
+            subtitulo: '${f.descricaoPeriodo} · ${f.linha == null ? 'todas as linhas' : 'linha ${f.linha}'} · viagens realizadas ÷ programadas',
           ),
           const SizedBox(height: 18),
           if (_erro != null) MensagemErro(_erro!),

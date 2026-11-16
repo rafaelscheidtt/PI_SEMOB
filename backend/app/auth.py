@@ -24,7 +24,7 @@ def usuario_atual(credencial: HTTPAuthorizationCredentials | None = Depends(_bea
     usuario = repo.buscar_por_email(db, dados["sub"])
     if usuario is None or not usuario.get("ativo", False):
         raise HTTPException(status_code=401, detail="Usuário desativado, fale com o administrador")
-    return {**{k: v for k, v in usuario.items() if k != "senha_hash"}, "_id": str(usuario["_id"])}
+    return repo.publico(usuario)
 
 
 def exigir_papel(*papeis: str):

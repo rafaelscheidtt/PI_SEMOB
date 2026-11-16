@@ -166,3 +166,28 @@ def test_us13_perfil_nao_deixa_o_usuario_mudar_o_proprio_papel(client):
 
 def test_us13_perfil_exige_login(anonimo):
     assert anonimo.put("/me", json={"nome": "X"}).status_code == 401
+
+
+def test_lgpd_usuario_novo_precisa_aceitar_o_termo_e_o_aceite_fica_registrado(client, db):
+    assert client.get("/me").json()["termo_pendente"] is True
+    r = client.post("/me/termo")
+    assert r.status_code == 200 and r.json()["termo_pendente"] is False
+    assert r.json()["termo_versao"] == repo.TERMO_VERSAO and r.json()["termo_aceito_em"]
+    assert client.get("/me").json()["termo_pendente"] is False
+    # o login também avisa, para o app saber antes de abrir o painel
+    r = client.post("/login", json={"email": ADMIN["email"], "senha": ADMIN["senha"]})
+    assert r.json()["usuario"]["termo_pendente"] is False
+
+
+def test_lgpd_termo_novo_pede_aceite_de_novo(client, db, monkeypatch):
+    client.post("/me/termo")
+    monkeypatch.setattr(repo, "TERMO_VERSAO", "2.0")
+    assert client.get("/me").json()["termo_pendente"] is True
+    assert client.post("/me/termo").json()["termo_versao"] == "2.0"
+
+
+def test_lgpd_aceite_exige_login_e_aparece_para_o_administrador(client, anonimo):
+    assert anonimo.post("/me/termo").status_code == 401
+    _criar_gestor(client)
+    gestor = next(u for u in client.get("/usuarios").json() if u["email"] == "gestor@semob.teste")
+    assert gestor["termo_pendente"] is True

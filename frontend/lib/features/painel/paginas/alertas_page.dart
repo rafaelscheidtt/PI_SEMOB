@@ -125,7 +125,7 @@ class _AlertasPageState extends State<AlertasPage> {
       const SizedBox(height: 18),
       Cartao(
         titulo: 'Dias com desvio',
-        subtitulo: 'Regras: RN09 cumprimento (aviso < 95%, crítico < 90%) · RN10 desvio do mesmo dia da semana nas últimas 8 semanas (aviso > 20%, crítico > 35%) · RN11 ocorrências acima do dobro da média diária',
+        subtitulo: 'Cumprimento baixo, movimento fora do padrão do mesmo dia da semana ou ocorrências acima do normal',
         acao: d.total == 0 ? null : _seletorFiltro(),
         child: d.total == 0
             ? const AvisoSemDados(texto: 'Nenhum alerta no período: a operação ficou dentro do padrão')

@@ -27,10 +27,18 @@ def validar_foto(foto: str) -> None:
         raise ValueError("não foi possível ler a foto") from exc
 
 
-def _publico(doc: dict | None) -> dict | None:
+# Versão do termo de uso e aviso de privacidade (LGPD). O texto fica no app
+# (frontend/lib/features/legal/termo_texto.dart); mudou o texto, muda a versão aqui
+# e todo mundo é convidado a ler e aceitar de novo no próximo acesso.
+TERMO_VERSAO = "1.0"
+
+
+def publico(doc: dict | None) -> dict | None:
+    """O usuário como a API devolve: sem o hash da senha e dizendo se falta aceitar o termo atual."""
     if doc is None:
         return None
-    return {**{k: v for k, v in doc.items() if k != "senha_hash"}, "_id": str(doc["_id"])}
+    return {**{k: v for k, v in doc.items() if k != "senha_hash"}, "_id": str(doc["_id"]),
+            "termo_pendente": doc.get("termo_versao") != TERMO_VERSAO}
 
 
 def buscar_por_email(db: Database, email: str) -> dict | None:
@@ -40,13 +48,13 @@ def buscar_por_email(db: Database, email: str) -> dict | None:
 
 def buscar_por_id(db: Database, usuario_id: str) -> dict | None:
     try:
-        return _publico(db.usuarios.find_one({"_id": ObjectId(usuario_id)}))
+        return publico(db.usuarios.find_one({"_id": ObjectId(usuario_id)}))
     except Exception:
         return None
 
 
 def listar(db: Database) -> list[dict]:
-    return [_publico(d) for d in db.usuarios.find().sort("nome", 1)]
+    return [publico(d) for d in db.usuarios.find().sort("nome", 1)]
 
 
 def criar(db: Database, nome: str, email: str, senha: str, papel: str) -> dict:
@@ -68,7 +76,7 @@ def criar(db: Database, nome: str, email: str, senha: str, papel: str) -> dict:
         "criado_em": datetime.now(timezone.utc),
     }
     doc["_id"] = db.usuarios.insert_one(doc).inserted_id
-    return _publico(doc)
+    return publico(doc)
 
 
 def atualizar(db: Database, usuario_id: str, *, nome: str | None = None, papel: str | None = None,
@@ -106,6 +114,16 @@ def atualizar(db: Database, usuario_id: str, *, nome: str | None = None, papel: 
     if apagar:
         operacao["$unset"] = apagar
     db.usuarios.update_one({"_id": oid}, operacao)
+    return buscar_por_id(db, usuario_id)
+
+
+def aceitar_termo(db: Database, usuario_id: str) -> dict | None:
+    """Registra que o usuário leu e aceitou a versão atual do termo, com a data."""
+    try:
+        oid = ObjectId(usuario_id)
+    except Exception:
+        return None
+    db.usuarios.update_one({"_id": oid}, {"$set": {"termo_versao": TERMO_VERSAO, "termo_aceito_em": datetime.now(timezone.utc)}})
     return buscar_por_id(db, usuario_id)
 
 

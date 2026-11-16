@@ -19,6 +19,9 @@ abstract class AuthRepository {
   /// O usuário logado muda os próprios dados. Para trocar a senha vão a atual e a nova;
   /// em [foto], um data URL troca a foto e um texto vazio apaga a que existe.
   Future<Usuario> atualizarPerfil({String? nome, String? senhaAtual, String? novaSenha, String? foto});
+
+  /// Registra que o usuário logado leu e aceitou o termo de uso e aviso de privacidade.
+  Future<Usuario> aceitarTermo();
 }
 
 class AuthRepositoryHttp implements AuthRepository {
@@ -97,6 +100,16 @@ class AuthRepositoryHttp implements AuthRepository {
       return Usuario.fromJson(r.data!);
     } on DioException catch (e) {
       throw _erro(e, 'Não foi possível salvar o perfil');
+    }
+  }
+
+  @override
+  Future<Usuario> aceitarTermo() async {
+    try {
+      final r = await _dio.post<Map<String, dynamic>>('/me/termo');
+      return Usuario.fromJson(r.data!);
+    } on DioException catch (e) {
+      throw _erro(e, 'Não foi possível registrar o aceite');
     }
   }
 }

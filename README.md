@@ -149,6 +149,7 @@ Fora `/login` e `/health`, todas pedem o cabeçalho `Authorization: Bearer <toke
 | `POST /login` | e-mail e senha; devolve o token e o papel do usuário |
 | `GET /me` | usuário da sessão atual |
 | `PUT /me` | o próprio usuário muda nome, foto e senha |
+| `POST /me/termo` | registra o aceite do termo de uso e aviso de privacidade (LGPD) |
 | `GET /usuarios`, `POST /usuarios`, `PUT /usuarios/{id}` | cadastro de usuários (só administrador) |
 | `POST /importacoes` | importa um ou mais relatórios (ou o `.zip`); gestor e administrador |
 | `GET /importacoes` | histórico de importações |

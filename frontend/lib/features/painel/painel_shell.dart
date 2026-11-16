@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/filtros.dart';
 import '../../core/layout.dart';
 import '../../core/periodo.dart';
+import '../../core/preferencia_menu.dart';
 import '../../core/tema.dart';
 import '../../core/tema_controle.dart';
 import '../../data/auth_repository.dart';
@@ -13,6 +14,7 @@ import '../../data/models.dart';
 import '../perfil/foto.dart';
 import '../perfil/perfil_dialog.dart';
 import '../relatorios/relatorios_page.dart';
+import '../sobre/sobre_page.dart';
 import '../usuarios/usuarios_page.dart';
 import 'paginas/alertas_page.dart';
 import 'paginas/cumprimento_page.dart';
@@ -46,6 +48,7 @@ class PainelShell extends StatefulWidget {
     this.brasaoPdf = carregarBrasao,
     this.onUsuarioAtualizado,
     this.escolherFoto = escolherFotoDoAparelho,
+    this.lembrarMenu = true,
   });
 
   final IndicadoresRepository repository;
@@ -75,6 +78,9 @@ class PainelShell extends StatefulWidget {
   /// Como a foto do perfil é escolhida (nos testes é substituída).
   final EscolherFoto escolherFoto;
 
+  /// Guarda no aparelho se o menu ficou travado aberto (desligado nos testes).
+  final bool lembrarMenu;
+
   @override
   State<PainelShell> createState() => _PainelShellState();
 }
@@ -87,12 +93,25 @@ class _PainelShellState extends State<PainelShell> {
   /// Linha aberta na tela de linhas (vinda da tabela de monitoramento ou da própria lista).
   String? _linhaAberta;
 
+  /// Menu lateral travado aberto pelo alfinete (só no desktop, onde ele recolhe).
+  bool _menuFixo = false;
+
   @override
   void initState() {
     super.initState();
     _filtros = widget.filtrosIniciais ?? FiltrosPainel.padrao();
     _tela = widget.telaInicial.permitidaPara(widget.usuario.papel) ? widget.telaInicial : Tela.visaoGeral;
     _carregarLinhas();
+    if (widget.menuRetratil && widget.lembrarMenu) {
+      PreferenciaMenu.ler().then((fixo) {
+        if (mounted && fixo) setState(() => _menuFixo = true);
+      });
+    }
+  }
+
+  void _alternarMenuFixo() {
+    setState(() => _menuFixo = !_menuFixo);
+    if (widget.lembrarMenu) PreferenciaMenu.gravar(_menuFixo);
   }
 
   Future<void> _carregarLinhas() async {
@@ -161,6 +180,8 @@ class _PainelShellState extends State<PainelShell> {
           repository: widget.repository,
           onAbrirAlertas: () => _irPara(Tela.alertas),
         );
+      case Tela.sobre:
+        return const SobrePage(key: ValueKey('tela-sobre'));
       case Tela.financeiro:
         return FinanceiroPage(key: const ValueKey('tela-financeiro'), filtros: _filtros, repository: widget.repository, onGranularidade: _trocarGranularidade);
       case Tela.alertas:
@@ -181,7 +202,7 @@ class _PainelShellState extends State<PainelShell> {
 
       final perfil = widget.authRepository == null ? null : _abrirPerfil;
       final menu = faixa == FaixaLargura.expandido && widget.menuRetratil
-          ? MenuRetratil(selecionada: _tela, usuario: widget.usuario, onSair: widget.onSair, onSelecionar: selecionar, tema: widget.tema, onPerfil: perfil)
+          ? MenuRetratil(selecionada: _tela, usuario: widget.usuario, onSair: widget.onSair, onSelecionar: selecionar, tema: widget.tema, onPerfil: perfil, fixo: _menuFixo, onFixar: _alternarMenuFixo)
           : MenuLateral(selecionada: _tela, usuario: widget.usuario, onSair: widget.onSair, onSelecionar: selecionar, tema: widget.tema, onPerfil: perfil);
       final barra = BarraFiltros(
         filtros: _filtros,
@@ -194,10 +215,27 @@ class _PainelShellState extends State<PainelShell> {
       );
       // cada tela entra com um esmaecimento curto, para a troca não ser seca
       final corpo = Column(children: [
-        if (_tela != Tela.usuarios) barra,
+        if (_tela != Tela.usuarios && _tela != Tela.sobre) barra,
         Expanded(child: _Entrada(key: ValueKey('entrada-${_tela.name}'), child: _conteudo())),
       ]);
 
+      if (faixa == FaixaLargura.expandido && widget.menuRetratil) {
+        // o conteúdo reserva só a faixa de ícones; aberto pelo mouse, o menu passa por cima
+        // sem reorganizar a tela. Travado no alfinete, aí sim o conteúdo cede o espaço.
+        return Scaffold(
+          body: Stack(children: [
+            Positioned.fill(
+              child: AnimatedPadding(
+                duration: const Duration(milliseconds: 240),
+                curve: Curves.easeOutCubic,
+                padding: EdgeInsets.only(left: _menuFixo ? larguraMenuAberto : larguraMenuRecolhido),
+                child: corpo,
+              ),
+            ),
+            Positioned(left: 0, top: 0, bottom: 0, child: menu),
+          ]),
+        );
+      }
       if (faixa == FaixaLargura.expandido) {
         return Scaffold(body: Row(children: [menu, Expanded(child: corpo)]));
       }

@@ -398,7 +398,7 @@ enum Papel {
 
 /// Usuário do painel (GET /me, GET /usuarios).
 class Usuario {
-  const Usuario({required this.id, required this.nome, required this.email, required this.papel, this.ativo = true, this.foto});
+  const Usuario({required this.id, required this.nome, required this.email, required this.papel, this.ativo = true, this.foto, this.termoPendente = false});
 
   final String id;
   final String nome;
@@ -408,6 +408,9 @@ class Usuario {
 
   /// Foto do perfil como data URL ("data:image/png;base64,..."); `null` para quem não pôs foto.
   final String? foto;
+
+  /// Falta ler e aceitar a versão atual do termo de uso e aviso de privacidade (LGPD).
+  final bool termoPendente;
 
   /// Primeira letra do primeiro e do último nome ("Ana Maria Admin" -> "AA"), para o avatar sem foto.
   String get iniciais {
@@ -424,6 +427,7 @@ class Usuario {
         papel: Papel.daApi(j['papel'] as String?),
         ativo: (j['ativo'] as bool?) ?? true,
         foto: (j['foto'] as String?)?.isEmpty ?? true ? null : j['foto'] as String,
+        termoPendente: (j['termo_pendente'] as bool?) ?? false,
       );
 }
 

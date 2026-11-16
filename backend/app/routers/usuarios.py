@@ -45,8 +45,7 @@ def login(credenciais: Credenciais, db: Database = Depends(get_db)):
         raise HTTPException(status_code=401, detail="E-mail ou senha incorretos")
     if not usuario.get("ativo", False):
         raise HTTPException(status_code=401, detail="Usuário desativado, fale com o administrador")
-    publico = {**{k: v for k, v in usuario.items() if k != "senha_hash"}, "_id": str(usuario["_id"])}
-    return {"token": gerar_token(usuario), "usuario": publico}
+    return {"token": gerar_token(usuario), "usuario": repo.publico(usuario)}
 
 
 @router.get("/me")
@@ -69,6 +68,12 @@ def editar_perfil(edicao: EdicaoPerfil, db: Database = Depends(get_db), usuario:
         return repo.atualizar(db, usuario["_id"], nome=edicao.nome, senha=edicao.nova_senha or None, foto=edicao.foto)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/me/termo")
+def aceitar_termo(db: Database = Depends(get_db), usuario: dict = Depends(usuario_atual)):
+    """Registra o aceite do termo de uso e aviso de privacidade (LGPD) pelo usuário logado."""
+    return repo.aceitar_termo(db, usuario["_id"])
 
 
 @router.get("/usuarios", dependencies=[Depends(exigir_papel("administrador"))])
