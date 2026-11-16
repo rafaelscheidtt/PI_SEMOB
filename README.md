@@ -35,8 +35,18 @@ e `atalhos/windows/` (arquivos `.bat`). É só clicar duas vezes no da sua máqu
 | `4 - importar relatorios` | importa os relatórios de `dados/semob` (só quando chegarem relatórios novos) |
 
 Pra demonstrar, tem ainda a pasta `atalhos/um clique/` (também com `mac/` e `windows/`), que sobe a API
-e o app de uma vez: `abrir no navegador` abre o DashMOB no computador e `abrir no celular` mostra um
-QR code pra abrir no celular, que precisa estar na mesma rede Wi-Fi.
+e o app de uma vez. O mesmo código roda de vários jeitos:
+
+| Atalho | Onde o app roda | O que precisa |
+|--------|-----------------|---------------|
+| `abrir no navegador` | navegador do computador | só o Flutter |
+| `abrir no celular` | navegador do celular, pelo QR code | celular na mesma rede Wi-Fi |
+| `instalar no celular (cabo)` | aplicativo instalado no Android ou no iPhone | celular no cabo e na mesma rede Wi-Fi; Android Studio (Android) ou Xcode num Mac (iPhone) |
+| `abrir como aplicativo` | aplicativo de computador, em janela própria | Xcode (Mac) ou Visual Studio com C++ (Windows) |
+| `abrir no simulador de iPhone` (só Mac) | aplicativo de iPhone, no Simulador do Xcode | Xcode; não precisa de cabo nem de conta da Apple |
+
+No aplicativo instalado o endereço da API vai gravado na hora de montar, apontando para o computador
+que rodou o atalho. O `flutter doctor` mostra o que falta instalar para cada plataforma.
 
 Na primeira vez, o `2 - subir API` cria o `backend/.env` e abre ele para colar a `MONGODB_URL`
 do Atlas, que a gente passa no privado. Precisa ter Python 3.12 e Flutter instalados. No Mac, se
