@@ -1,4 +1,4 @@
-"""Validação dos registros lidos dos relatórios (RN05)."""
+"""Validação dos registros lidos dos relatórios."""
 from datetime import date
 from typing import Any
 

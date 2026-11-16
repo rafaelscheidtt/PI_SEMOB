@@ -13,14 +13,13 @@ import '../widgets/estados.dart';
 import '../widgets/grafico_colunas.dart';
 import '../widgets/kpi_card.dart';
 
-/// Passageiros: pagantes, gratuidades, total e média por viagem (US04, RN02, RN03).
+/// Passageiros: pagantes, gratuidades, total e média por viagem.
 class PassageirosPage extends StatefulWidget {
   const PassageirosPage({super.key, required this.filtros, required this.repository, this.onGranularidade});
 
   final FiltrosPainel filtros;
   final IndicadoresRepository repository;
 
-  /// Troca a granularidade dos gráficos (dia, semana, mês); os cartões de total não dependem dela.
   final ValueChanged<Granularidade>? onGranularidade;
 
   @override

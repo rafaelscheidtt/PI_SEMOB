@@ -22,17 +22,12 @@ enum Tela {
   final String rotulo;
   final IconData icone;
 
-  /// Grupo "Gestão" do menu (Sprint 2).
   final bool gestao;
 
-  /// Grupo "Administração" do menu, só para o administrador (US13).
   final bool administracao;
 
-  /// Telas de apoio (Sobre): todo mundo abre, pelo rodapé do menu, e por isso ficam fora da lista de telas.
   final bool sistema;
 
-  /// O que cada papel enxerga no menu (US11). O executivo não importa relatórios,
-  /// não vê o detalhe por linha e não cadastra ninguém.
   bool permitidaPara(Papel papel) {
     if (sistema) return true;
     switch (papel) {
@@ -45,11 +40,8 @@ enum Tela {
     }
   }
 
-  /// Nome do grupo do menu, usado no cabeçalho ("Operação • Visão Geral").
   String get grupo => sistema ? 'Sistema' : (administracao ? 'Administração' : (gestao ? 'Gestão' : 'Operação'));
 
-  /// Cor da tela: um detalhe fino no item do menu e embaixo do cabeçalho, para situar quem está navegando.
-  /// Todas saem do brasão de São Caetano do Sul (azul, verde, vermelho e o amarelo da coroa), mais o cinza.
   Color get cor => switch (this) {
         Tela.visaoGeral || Tela.executiva => _azul,
         Tela.monitoramento => _azulClaro,
@@ -68,9 +60,7 @@ enum Tela {
   static const _ouro = Color(0xFFA07C00);
   static const _cinza = Color(0xFF5F6673);
 
-  /// As telas que aparecem na lista do menu para o papel.
   static List<Tela> permitidas(Papel papel) => values.where((t) => !t.sistema && t.permitidaPara(papel)).toList();
 
-  /// Tela em que cada papel cai depois do login (US09: o executivo vai direto para a visão executiva).
   static Tela inicialPara(Papel papel) => papel == Papel.executivo ? executiva : visaoGeral;
 }

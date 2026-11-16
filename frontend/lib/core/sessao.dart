@@ -39,8 +39,7 @@ class ArmazenamentoMemoria implements ArmazenamentoSessao {
   Future<void> gravar(String? token) async => _token = token;
 }
 
-/// Token da sessão atual. O [Dio] criado por [criarDio] envia este token em toda chamada
-/// e avisa (via [aoExpirar]) quando a API responde 401, para o app voltar ao login.
+/// Token da sessão atual.
 class SessaoAtual {
   String? token;
   void Function()? aoExpirar;

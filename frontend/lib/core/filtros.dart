@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'formatos.dart';
 import 'periodo.dart';
 
-/// Filtros escolhidos na barra superior e compartilhados por todas as telas (US05).
+/// Filtros escolhidos na barra superior e compartilhados por todas as telas.
 class FiltrosPainel {
   const FiltrosPainel({required this.inicio, required this.fim, this.granularidade = Granularidade.dia, this.linha});
 
@@ -11,10 +11,8 @@ class FiltrosPainel {
   final DateTime fim;
   final Granularidade granularidade;
 
-  /// Código da linha, ou `null` para o sistema inteiro.
   final String? linha;
 
-  /// Últimos 30 dias até [hoje].
   factory FiltrosPainel.padrao([DateTime? hoje]) {
     final h = hoje ?? DateTime.now();
     final fim = DateTime(h.year, h.month, h.day);
@@ -29,11 +27,9 @@ class FiltrosPainel {
         linha: limparLinha ? null : (linha ?? this.linha),
       );
 
-  /// `true` quando o intervalo é exatamente um mês inteiro.
   bool get mesInteiro =>
       inicio.day == 1 && inicio.year == fim.year && inicio.month == fim.month && fim.day == DateTime(fim.year, fim.month + 1, 0).day;
 
-  /// "Agosto de 2026" para um mês inteiro, senão "01/08/2026 – 14/08/2026".
   String get descricaoPeriodo {
     if (mesInteiro) {
       final nome = DateFormat('MMMM', 'pt_BR').format(inicio);

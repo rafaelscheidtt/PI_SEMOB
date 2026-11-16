@@ -7,18 +7,15 @@ import '../../data/models.dart';
 import '../painel/widgets/estados.dart';
 import '../painel/widgets/marca.dart';
 
-/// Tela de entrada do painel (US11): e-mail e senha, nada de cadastro por aqui —
-/// quem cria usuário é o administrador, dentro do app.
+/// Tela de login. Não tem cadastro aqui: quem cria usuário é o administrador.
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.repository, required this.onEntrou, this.aviso, this.tema});
 
   final AuthRepository repository;
   final ValueChanged<Sessao> onEntrou;
 
-  /// Mensagem mostrada ao abrir (por exemplo, "sessão expirada").
   final String? aviso;
 
-  /// Modo claro/escuro; com ele aparece o botão de alternar no canto do cartão.
   final ControleTema? tema;
 
   @override

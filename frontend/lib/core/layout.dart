@@ -1,8 +1,7 @@
-/// Faixas de largura do layout responsivo (US06).
+/// Faixas de largura do layout responsivo.
 enum FaixaLargura { compacto, medio, expandido }
 
-/// Compacto até 600 dp (celular), médio de 600 a 1024 dp (tablet),
-/// expandido acima de 1024 dp (desktop e web).
+/// Compacto até 600 dp (celular), médio de 600 a 1024 dp (tablet), expandido acima de 1024 dp (desktop e web).
 FaixaLargura faixaDeLargura(double largura) {
   if (largura < 600) return FaixaLargura.compacto;
   if (largura < 1024) return FaixaLargura.medio;

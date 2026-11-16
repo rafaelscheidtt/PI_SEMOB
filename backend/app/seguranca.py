@@ -1,4 +1,4 @@
-"""Senhas e tokens de acesso (US11).
+"""Senhas e tokens de acesso.
 
 Tudo com a biblioteca padrão do Python: a senha é guardada com PBKDF2 (sal aleatório)
 e o token é um JSON assinado com HMAC-SHA256, no mesmo formato de um JWT HS256.

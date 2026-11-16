@@ -3,11 +3,10 @@ import 'package:dio/dio.dart';
 import 'indicadores_repository.dart';
 import 'models.dart';
 
-/// Login e cadastro de usuários (US11, US13). As telas usam só esta interface.
+/// Login e cadastro de usuários. As telas usam só esta interface.
 abstract class AuthRepository {
   Future<Sessao> login(String email, String senha);
 
-  /// Confere um token guardado e devolve o usuário dele (ou lança ErroApi se venceu).
   Future<Usuario> quemSou();
 
   Future<List<Usuario>> usuarios();
@@ -16,11 +15,8 @@ abstract class AuthRepository {
 
   Future<Usuario> editarUsuario(String id, {String? nome, Papel? papel, bool? ativo, String? senha});
 
-  /// O usuário logado muda os próprios dados. Para trocar a senha vão a atual e a nova;
-  /// em [foto], um data URL troca a foto e um texto vazio apaga a que existe.
   Future<Usuario> atualizarPerfil({String? nome, String? senhaAtual, String? novaSenha, String? foto});
 
-  /// Registra que o usuário logado leu e aceitou o termo de uso e aviso de privacidade.
   Future<Usuario> aceitarTermo();
 }
 

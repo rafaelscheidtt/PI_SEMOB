@@ -7,8 +7,7 @@ import 'package:file_picker/file_picker.dart';
 /// Lado, em pixels, da foto guardada no perfil. Pequena de propósito: ela vai dentro do cadastro do usuário.
 const ladoDaFoto = 160;
 
-/// Função que devolve a foto escolhida já pronta para a API (data URL); `null` se o usuário desistiu.
-/// Nos testes é trocada por uma falsa.
+/// Devolve a foto escolhida como data URL, ou `null` se o usuário desistiu.
 typedef EscolherFoto = Future<String?> Function();
 
 /// Abre o seletor de imagens do aparelho e devolve a foto recortada em quadrado e reduzida.
@@ -20,7 +19,6 @@ Future<String?> escolherFotoDoAparelho() async {
 }
 
 /// Recorta o centro da imagem em quadrado, reduz para [ladoDaFoto] e devolve como data URL em PNG.
-/// Lança [FormatException] se o arquivo não for uma imagem que o aparelho consiga abrir.
 Future<String> prepararFoto(Uint8List original) async {
   final ui.Image imagem;
   try {

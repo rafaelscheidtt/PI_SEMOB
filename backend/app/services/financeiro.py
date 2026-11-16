@@ -1,8 +1,8 @@
-"""Indicadores financeiros por período (US07).
+"""Indicadores financeiros por período.
 
 Os valores vêm dos relatórios de saldo de créditos e de venda x utilização do Smart Report
 (em reais). A bilhetagem só começou em 15/07/2026, com o fim do Tarifa Zero para quem não
-é cadastrado; antes disso não há dado financeiro, e o painel mostra "Sem dados" (RN06).
+é cadastrado; antes disso não há dado financeiro, e o painel mostra "Sem dados".
 
 RN12 crédito circulante = vendas - utilização (vem pronto no relatório; aqui só é somado)
 """

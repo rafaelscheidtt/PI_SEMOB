@@ -12,7 +12,7 @@ router = APIRouter(tags=["alertas"])
 
 @router.get("/alertas", response_model=RespostaAlertas)
 def alertas(inicio: date, fim: date, linha: str | None = None, db: Database = Depends(get_db)):
-    """Dias fora do padrão no período (US08): cumprimento baixo, desvio do histórico e excesso de ocorrências."""
+    """Dias fora do padrão no período: cumprimento baixo, desvio do histórico e excesso de ocorrências."""
     try:
         return gerar_alertas(db, inicio, fim, linha)
     except ValueError as exc:  # RN07

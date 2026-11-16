@@ -28,7 +28,7 @@ Future<List<ArquivoEnvio>> escolherArquivosDoSistema() async {
   ];
 }
 
-/// Importação de relatórios: envio do pacote e histórico do que já entrou (US01).
+/// Importação de relatórios: envio do pacote e histórico do que já entrou.
 class ImportacaoPage extends StatefulWidget {
   const ImportacaoPage({super.key, required this.repository, this.escolherArquivos = escolherArquivosDoSistema});
 

@@ -29,14 +29,10 @@ class GraficoColunas extends StatelessWidget {
   final List<SerieColunas> series;
   final double altura;
 
-  /// Formatação dos valores no eixo e no tooltip (padrão: inteiro).
   final String Function(double)? formato;
 
-  /// Teto fixo do eixo (ex.: 100 para percentuais); sem ele, 15% acima do maior valor.
   final double? maximoY;
 
-  /// Piso do eixo. Útil quando os valores variam pouco (FCV entre 97% e 99%): as colunas
-  /// começam no piso e a diferença entre elas fica visível. Veja [pisoDoEixo].
   final double? minimoY;
 
   double _valor(SerieColunas s, int i) => i < s.valores.length ? s.valores[i] : 0;
@@ -161,10 +157,7 @@ class LegendaSeries extends StatelessWidget {
   }
 }
 
-/// Piso para o eixo de um gráfico que varia pouco (FCV entre 99,6% e 99,9%, por exemplo):
-/// começa um pouco abaixo do menor valor, deixando como folga a própria variação observada,
-/// arredondado para um passo redondo (0,5, 1 ou 5 conforme a amplitude), nunca abaixo de zero.
-/// Ex.: 99,66..99,92 -> 99,0 · 97,5..99,1 -> 95 · 82..99 -> 65 · 12..50 -> 0.
+/// Piso do eixo para gráficos que variam pouco. Ex.: 99,66..99,92 -> 99,0 · 97,5..99,1 -> 95 · 82..99 -> 65.
 double pisoDoEixo(Iterable<double> valores, {double teto = 100}) {
   final validos = valores.where((v) => v > 0).toList();
   if (validos.isEmpty) return 0;

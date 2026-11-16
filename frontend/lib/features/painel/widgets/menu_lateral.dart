@@ -11,12 +11,7 @@ import 'marca.dart';
 const larguraMenuAberto = 256.0;
 const larguraMenuRecolhido = 72.0;
 
-/// Menu lateral azul-escuro do protótipo: logo, grupos Operação, Gestão e Administração e o usuário.
-/// Só aparecem as telas que o papel do usuário pode ver (US11). Em modo [compacto] mostra só os
-/// ícones, com o nome da tela na dica ao passar o mouse.
-///
-/// Os ícones, o brasão e a foto ficam exatamente no mesmo lugar nos dois modos: o que muda é só
-/// se o texto ao lado existe. Assim nada pula quando o menu abre ou recolhe.
+/// Menu lateral: logo, grupos de telas e o usuário logado.
 class MenuLateral extends StatelessWidget {
   const MenuLateral({
     super.key,
@@ -40,19 +35,14 @@ class MenuLateral extends StatelessWidget {
   final double largura;
   final bool compacto;
 
-  /// Modo claro/escuro; com ele aparece o botão de alternar no rodapé.
   final ControleTema? tema;
 
-  /// Abre "Meu perfil" ao tocar no nome ou na foto do rodapé; sem ele o rodapé não é clicável.
   final VoidCallback? onPerfil;
 
-  /// Menu travado aberto (só faz sentido no menu que recolhe).
   final bool fixo;
 
-  /// Trava ou solta o menu aberto; com ele aparece o alfinete ao lado de "Operação".
   final VoidCallback? onFixar;
 
-  /// Quanto o menu já abriu, de 0 a 1: os textos vão aparecendo junto com a largura.
   final double abertura;
 
   @override
@@ -111,16 +101,12 @@ class MenuLateral extends StatelessWidget {
 }
 
 /// Margem lateral do menu e medidas das linhas, iguais com ele aberto ou recolhido.
-/// Com 14 de margem, a coluna dos ícones fica centrada nos 72 px do menu recolhido.
 const _margem = 14.0;
 const _alturaItem = 38.0;
 const _alturaTitulo = 30.0;
 const _duracao = Duration(milliseconds: 180);
 
-/// Menu que fica recolhido (só ícones) e abre quando o mouse passa por cima, para não
-/// ocupar a tela enquanto não está em uso (US06). Em telas de toque os ícones já navegam.
-/// Aberto pelo mouse ele passa por cima do conteúdo, sem empurrar nada; com [fixo] fica
-/// aberto de vez (aí quem o usa reserva o espaço, veja o PainelShell).
+/// Menu que fica recolhido (só ícones) e abre quando o mouse passa por cima.
 class MenuRetratil extends StatefulWidget {
   const MenuRetratil({
     super.key,
@@ -241,7 +227,6 @@ class _Logo extends StatelessWidget {
   final bool compacto;
   final double opacidade;
 
-  /// No menu recolhido, tocar no brasão trava o menu aberto (é o caminho em telas de toque, sem mouse).
   final VoidCallback? onFixar;
 
   @override
@@ -282,8 +267,7 @@ class _Logo extends StatelessWidget {
   }
 }
 
-/// Título de um grupo do menu. Ocupa sempre a mesma altura: aberto mostra o nome,
-/// recolhido mostra um fio no lugar (menos no primeiro grupo, que já vem depois do fio do logo).
+/// Título de um grupo do menu.
 class _TituloGrupo extends StatelessWidget {
   const _TituloGrupo(this.texto, {required this.compacto, required this.opacidade, this.comFio = true, this.acao});
 
@@ -292,7 +276,6 @@ class _TituloGrupo extends StatelessWidget {
   final double opacidade;
   final bool comFio;
 
-  /// Botão pequeno no fim da linha (o alfinete de travar o menu).
   final Widget? acao;
 
   @override

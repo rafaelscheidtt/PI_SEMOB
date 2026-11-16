@@ -15,8 +15,7 @@ Future<Usuario?> abrirPerfil(BuildContext context, {required Usuario usuario, re
   );
 }
 
-/// Meu perfil: o usuário logado troca o próprio nome, a foto e a senha (US13).
-/// Papel e e-mail aparecem só para consulta; quem muda é o administrador.
+/// Meu perfil: o usuário logado troca o próprio nome, a foto e a senha.
 class PerfilDialog extends StatefulWidget {
   const PerfilDialog({super.key, required this.usuario, required this.repository, this.escolherFoto = escolherFotoDoAparelho});
 
@@ -35,7 +34,6 @@ class _PerfilDialogState extends State<PerfilDialog> {
   final _novaSenha = TextEditingController();
   final _confirmar = TextEditingController();
 
-  /// Foto mostrada no formulário: começa com a atual e muda ao escolher ou remover.
   late String? _foto = widget.usuario.foto;
   bool _salvando = false;
   String? _erro;

@@ -17,7 +17,7 @@ def get_db() -> Database:
 
 
 def criar_indices(db: Database) -> None:
-    """Índices do modelo lógico (seção 5 da documentação)."""
+    """Índices do modelo lógico."""
     db.operacao_diaria.create_index([("data", ASCENDING)], unique=True)
     db.operacao_linha_diaria.create_index([("data", ASCENDING), ("linha_id", ASCENDING)], unique=True)
     db.operacao_linha_diaria.create_index([("linha_id", ASCENDING), ("data", ASCENDING)])

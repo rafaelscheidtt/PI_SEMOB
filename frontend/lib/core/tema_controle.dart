@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'tema.dart';
 
-/// Modo claro/escuro escolhido pelo usuário, guardado no aparelho (US06).
+/// Modo claro/escuro escolhido pelo usuário, guardado no aparelho.
 class ControleTema extends ValueNotifier<ThemeMode> {
   ControleTema({ThemeMode inicial = ThemeMode.light, this.persistir = true}) : super(inicial) {
     Cores.aplicar(inicial);
@@ -11,12 +11,10 @@ class ControleTema extends ValueNotifier<ThemeMode> {
 
   static const _chave = 'dashmob.tema';
 
-  /// Nos testes fica desligado, para não depender do shared_preferences.
   final bool persistir;
 
   bool get escuro => value == ThemeMode.dark;
 
-  /// Lê a escolha guardada (se houver). Chamar uma vez, antes do runApp.
   Future<void> carregar() async {
     if (!persistir) return;
     try {

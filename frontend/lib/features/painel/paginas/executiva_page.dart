@@ -11,8 +11,7 @@ import '../widgets/cartao.dart';
 import '../widgets/estados.dart';
 import '../widgets/kpi_card.dart';
 
-/// Visão executiva (US09): o resumo do período para o secretário apresentar ao prefeito —
-/// seis destaques com a variação, o comparativo com o período anterior e os pontos de atenção.
+/// Visão executiva: resumo do período para o secretário apresentar.
 class ExecutivaPage extends StatefulWidget {
   const ExecutivaPage({super.key, required this.filtros, required this.repository, this.onAbrirAlertas});
 

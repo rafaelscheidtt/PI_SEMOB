@@ -6,9 +6,7 @@ import '../../../core/periodo.dart';
 import '../../../core/tema.dart';
 import '../../../data/models.dart';
 
-/// Barra superior com o nome da tela e os filtros que valem para a tela inteira: intervalo e linha (US05).
-/// Um filete na cor da tela acompanha a base da barra.
-/// A granularidade (dia, semana, mês) só muda os gráficos, por isso fica junto deles ([SeletorGranularidade]).
+/// Barra superior com o nome da tela e os filtros de intervalo e linha.
 class BarraFiltros extends StatelessWidget {
   const BarraFiltros({
     super.key,
@@ -27,10 +25,8 @@ class BarraFiltros extends StatelessWidget {
   final ValueChanged<FiltrosPainel> onFiltros;
   final String titulo;
 
-  /// Grupo do menu, escrito em cinza antes do título ("Operação / Visão Geral").
   final String? grupo;
 
-  /// Cor do filete embaixo da barra (a da tela aberta); sem ela, só a linha cinza.
   final Color? cor;
 
   Future<void> _escolherIntervalo(BuildContext context) async {
@@ -140,8 +136,7 @@ class FileteDaTela extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// Seletor de granularidade dos gráficos (RN01): diária, semanal ou mensal.
-/// Fica em cima dos gráficos, porque os cartões de indicador mostram o total do período e não mudam com ele.
+/// Seletor de granularidade dos gráficos: diária, semanal ou mensal.
 class SeletorGranularidade extends StatelessWidget {
   const SeletorGranularidade({super.key, required this.granularidade, required this.onChanged});
 

@@ -14,7 +14,7 @@ import '../widgets/grafico_colunas.dart';
 import '../widgets/kpi_card.dart';
 import '../widgets/tabela_linhas.dart';
 
-/// Linhas: tabela de monitoramento de todas as linhas e o detalhamento de uma linha (US05).
+/// Linhas: tabela de monitoramento de todas as linhas e o detalhamento de uma linha.
 class LinhasPage extends StatefulWidget {
   const LinhasPage({
     super.key,
@@ -28,7 +28,6 @@ class LinhasPage extends StatefulWidget {
   final FiltrosPainel filtros;
   final IndicadoresRepository repository;
 
-  /// Código da linha em detalhe; `null` mostra a lista.
   final String? linhaAberta;
   final ValueChanged<String>? onAbrirLinha;
   final VoidCallback? onVoltar;
@@ -152,7 +151,6 @@ class LinhaDetalhe extends StatefulWidget {
   final FiltrosPainel filtros;
   final IndicadoresRepository repository;
 
-  /// Resumo de todas as linhas, para calcular a participação na oferta.
   final List<ResumoLinha> resumoSistema;
   final VoidCallback? onVoltar;
 

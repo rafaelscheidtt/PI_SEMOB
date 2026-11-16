@@ -7,7 +7,6 @@ import 'models.dart';
 
 /// Acesso aos dados. As telas usam só esta interface, assim os testes passam um repositório falso.
 abstract class IndicadoresRepository {
-  /// Série e totais do período; com [comparar] a API devolve também o período anterior.
   Future<Indicadores> obter({
     required DateTime inicio,
     required DateTime fim,
@@ -18,25 +17,18 @@ abstract class IndicadoresRepository {
 
   Future<List<Linha>> linhas();
 
-  /// Km, viagens e ocorrências de cada linha no período.
   Future<List<ResumoLinha>> resumoPorLinha({required DateTime inicio, required DateTime fim});
 
-  /// Viagens não realizadas, não iniciadas e não terminadas.
   Future<List<Ocorrencia>> ocorrencias({required DateTime inicio, required DateTime fim, String? linha, TipoOcorrencia? tipo});
 
-  /// Cumprimento por turno e viagens por faixa horária.
   Future<DetalhesOperacao> detalhes({required DateTime inicio, required DateTime fim, String? linha});
 
-  /// Vendas, utilização, crédito circulante e saldo de créditos do período (US07); sempre do sistema inteiro.
   Future<Financeiro> financeiro({required DateTime inicio, required DateTime fim, required Granularidade granularidade, bool comparar = false});
 
-  /// Dias fora do padrão no período (US08): cumprimento baixo, desvio do histórico e excesso de ocorrências.
   Future<Alertas> alertas({required DateTime inicio, required DateTime fim, String? linha});
 
-  /// Histórico de relatórios importados, do mais recente para o mais antigo.
   Future<List<Importacao>> importacoes();
 
-  /// Envia relatórios HTML (ou o .zip do pacote) para importação.
   Future<ResultadoImportacao> importar(List<ArquivoEnvio> arquivos);
 }
 

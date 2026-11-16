@@ -9,8 +9,7 @@ import '../painel/widgets/cartao.dart';
 
 const versaoDoApp = '0.1.0';
 
-/// Sobre o DashMOB: o que é o painel, como os números são calculados, o que cada perfil
-/// acessa, privacidade e quem desenvolveu. Reúne as explicações que antes ficavam espalhadas pelas telas.
+/// Tela Sobre: o que é o painel, como os números são calculados e o que cada perfil acessa.
 class SobrePage extends StatelessWidget {
   const SobrePage({super.key});
 

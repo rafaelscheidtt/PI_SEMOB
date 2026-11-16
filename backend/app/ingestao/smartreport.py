@@ -198,7 +198,7 @@ PULAR = object()  # linha de totais ou cabeçalho repetido: não é um registro
 
 
 def _dia(valor: str | None):
-    """Data dd/mm/aaaa. Linhas de total (sem padrão de data) são puladas; datas inválidas viram None (RN05)."""
+    """Data dd/mm/aaaa. Linhas de total (sem padrão de data) são puladas; datas inválidas viram None."""
     if not valor or not re.match(r"\s*\d{1,2}/\d{1,2}/\d{4}\s*$", valor):
         return PULAR
     return data_br(valor)

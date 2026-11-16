@@ -174,7 +174,7 @@ def listar_linhas(db: Database) -> list[dict]:
 
 
 def agregar_financeiro(db: Database, inicio: date, fim: date, granularidade: str) -> list[dict]:
-    """Série financeira do sistema (US07) a partir de `operacao_diaria.financeiro`.
+    """Série financeira do sistema a partir de `operacao_diaria.financeiro`.
 
     Vendas, utilização, crédito circulante e créditos transferidos são somados no período;
     o saldo final é o do último dia do período que tem o relatório de saldos.

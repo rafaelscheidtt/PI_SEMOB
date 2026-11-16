@@ -14,21 +14,17 @@ import '../widgets/grafico_colunas.dart';
 import '../widgets/kpi_card.dart';
 import '../widgets/tabela_linhas.dart';
 
-/// Visão Geral: os quatro indicadores principais, pagantes × gratuidades, FCV, faixas horárias
-/// e o monitoramento por linha (US02 a US05).
+/// Visão Geral: indicadores principais, gráficos do período e tabela por linha.
 class VisaoGeralPage extends StatefulWidget {
   const VisaoGeralPage({super.key, required this.filtros, required this.repository, this.onAbrirLinha, this.onAbrirAlertas, this.onGranularidade});
 
   final FiltrosPainel filtros;
   final IndicadoresRepository repository;
 
-  /// Troca a granularidade dos gráficos (dia, semana, mês); os cartões de total não dependem dela.
   final ValueChanged<Granularidade>? onGranularidade;
 
-  /// Chamado ao clicar em uma linha da tabela de monitoramento.
   final ValueChanged<String>? onAbrirLinha;
 
-  /// Chamado pelo "Ver alertas" da faixa de destaque (US08).
   final VoidCallback? onAbrirAlertas;
 
   @override
@@ -91,7 +87,6 @@ class _VisaoGeralPageState extends State<VisaoGeralPage> {
     }
   }
 
-  /// Os alertas chegam à parte: se a rota falhar, o painel continua normal, só sem a faixa.
   Future<void> _carregarAlertas(FiltrosPainel f) async {
     try {
       final a = await widget.repository.alertas(inicio: f.inicio, fim: f.fim, linha: f.linha);
@@ -300,7 +295,6 @@ class _VisaoGeralPageState extends State<VisaoGeralPage> {
         SerieColunas(nome: 'Gratuidades', valores: [for (final p in d.serie) (p.naoPagantes ?? 0).toDouble()], cor: Cores.verde),
       ];
 
-  /// Passageiros comparam com o período anterior só quando ele tem bilhetagem completa.
   Widget? _etiquetaPassageiros(Totais t, PeriodoAnterior? ant, String rotuloAnt) {
     if (t.total == null || ant == null || ant.totais.total == null) return null;
     if (ant.totais.diasComPassageiros < ant.totais.diasComDados) {

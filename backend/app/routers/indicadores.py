@@ -45,7 +45,7 @@ def indicadores_financeiros(
     comparar: bool = False,
     db: Database = Depends(get_db),
 ):
-    """Vendas, utilização, crédito circulante e saldo de créditos por período (US07).
+    """Vendas, utilização, crédito circulante e saldo de créditos por período.
     A bilhetagem é do sistema inteiro, por isso não há filtro por linha."""
     try:
         return obter_financeiro(db, inicio, fim, granularidade, comparar)

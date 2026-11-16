@@ -1,4 +1,4 @@
-"""Login (US11), perfil do próprio usuário e cadastro de usuários pelo administrador (US13)."""
+"""Login, perfil do próprio usuário e cadastro de usuários pelo administrador."""
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from pymongo.database import Database

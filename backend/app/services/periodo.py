@@ -1,4 +1,4 @@
-"""Chave de período (RN01) e validação de intervalo (RN07)."""
+"""Chave de período e validação de intervalo."""
 from datetime import date
 
 GRANULARIDADES = ("dia", "semana", "mes")

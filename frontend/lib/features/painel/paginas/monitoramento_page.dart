@@ -11,8 +11,7 @@ import '../../../data/indicadores_repository.dart';
 import '../../../data/models.dart';
 import '../widgets/estados.dart';
 
-/// Cores da tela de monitoramento: seguem o modo claro/escuro do app, com os sinais
-/// (verde, âmbar, vermelho) mais vivos no escuro para ler de longe.
+/// Cores da tela de monitoramento: seguem o modo claro/escuro do app, com os sinais (verde, âmbar, vermelho) mais vivos no escuro para ler de longe.
 class _Tons {
   _Tons._();
 
@@ -26,16 +25,13 @@ class _Tons {
   static Color get ambar => escuro ? const Color(0xFFFFC95C) : Cores.ambar;
 }
 
-/// Monitoramento (US14): uma tela só, pensada para ficar aberta numa TV na sala da SEMOB.
-/// Números grandes, poucos elementos e contraste alto, para quem passa longe conseguir ler.
-/// Atualiza sozinha de tempos em tempos e destaca os alertas críticos do período (US08).
+/// Monitoramento: uma tela só, pensada para ficar aberta numa TV na sala da SEMOB.
 class MonitoramentoPage extends StatefulWidget {
   const MonitoramentoPage({super.key, required this.filtros, required this.repository, this.intervaloAtualizacao = const Duration(minutes: 5)});
 
   final FiltrosPainel filtros;
   final IndicadoresRepository repository;
 
-  /// De quanto em quanto tempo a tela consulta a API de novo; `null` desliga.
   final Duration? intervaloAtualizacao;
 
   @override
@@ -257,7 +253,6 @@ class _Painel extends StatelessWidget {
   final String? detalhe;
   final double? variacao;
 
-  /// Cor do número; sem ela, a cor de texto do tema.
   final Color? cor;
 
 

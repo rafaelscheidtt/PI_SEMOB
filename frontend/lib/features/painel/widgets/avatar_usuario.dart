@@ -21,12 +21,10 @@ Uint8List? bytesDaFoto(String? foto) {
 class AvatarUsuario extends StatefulWidget {
   const AvatarUsuario({super.key, required this.iniciais, this.foto, this.raio = 16, required this.fundo, required this.corTexto});
 
-  /// Atalho para quando já se tem o [Usuario] em mãos.
   AvatarUsuario.de(Usuario usuario, {super.key, this.raio = 16, required this.fundo, required this.corTexto})
       : iniciais = usuario.iniciais,
         foto = usuario.foto;
 
-  /// Mostradas quando não há foto.
   final String iniciais;
   final String? foto;
   final double raio;

@@ -8,7 +8,7 @@ import '../../core/formatos.dart';
 import '../../core/periodo.dart';
 import '../../data/models.dart';
 
-/// O que entra no relatório (US10). Cada parte é opcional: só as seções marcadas são consultadas.
+/// O que entra no relatório. Cada parte é opcional: só as seções marcadas são consultadas.
 class ConteudoRelatorio {
   const ConteudoRelatorio({
     required this.filtros,
@@ -31,7 +31,6 @@ class ConteudoRelatorio {
   final List<ResumoLinha>? linhas;
   final String? geradoPor;
 
-  /// PNG do brasão, quando o app consegue carregar o asset.
   final Uint8List? brasao;
 }
 
