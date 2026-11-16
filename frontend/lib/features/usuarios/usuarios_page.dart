@@ -8,7 +8,7 @@ import '../painel/widgets/avatar_usuario.dart';
 import '../painel/widgets/cartao.dart';
 import '../painel/widgets/estados.dart';
 
-/// Cadastro de usuários pelo administrador (US13): lista, cria, edita e desativa.
+/// Cadastro de usuários pelo administrador: lista, cria, edita e desativa.
 class UsuariosPage extends StatefulWidget {
   const UsuariosPage({super.key, required this.repository, required this.usuarioLogado});
 

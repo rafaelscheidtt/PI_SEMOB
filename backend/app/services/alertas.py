@@ -1,4 +1,4 @@
-"""Alertas de desvio na operação (US08).
+"""Alertas de desvio na operação.
 
 RN09 cumprimento baixo: dia com FCV abaixo de 95% vira aviso; abaixo de 90%, crítico.
 RN10 fora do padrão histórico: km, viagens e passageiros do dia são comparados com a média

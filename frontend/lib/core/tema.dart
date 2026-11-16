@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Cores que mudam entre o modo claro e o escuro: fundo, cartões, linhas, textos e os tons suaves
-/// das etiquetas. As cores de marca (navy, verde, vermelho...) ficam iguais nos dois modos.
+/// Cores que mudam entre o modo claro e o escuro.
 class Paleta {
   const Paleta({
     required this.fundo,
@@ -29,17 +28,13 @@ class Paleta {
   final Color ambarSuave;
   final Color azulSuave;
 
-  /// Azul de informação (etiquetas, avisos); mais claro no modo escuro para ter contraste.
   final Color azul;
 
-  /// Cor principal dos dados (colunas, sparklines, segmento selecionado): navy no claro, azul-claro no escuro.
   final Color destaque;
 
-  /// Texto em cima de [destaque].
   final Color sobreDestaque;
   final bool escura;
 
-  /// As cores do protótipo no Figma.
   static const clara = Paleta(
     fundo: Color(0xFFF3F3F4),
     superficie: Colors.white,
@@ -56,7 +51,6 @@ class Paleta {
     escura: false,
   );
 
-  /// Modo escuro: mesmos azuis do menu, fundo quase preto e texto claro.
   static const escuro = Paleta(
     fundo: Color(0xFF0F1124),
     superficie: Color(0xFF1A1C38),
@@ -74,9 +68,7 @@ class Paleta {
   );
 }
 
-/// Cores do painel. As de marca são constantes; as de superfície e texto vêm da [Paleta]
-/// em uso, trocada por [aplicar] quando o usuário alterna o modo escuro (o app inteiro é
-/// reconstruído em seguida, então todos os widgets pegam a paleta nova).
+/// Cores do painel.
 class Cores {
   Cores._();
 
@@ -105,7 +97,6 @@ class Cores {
   static Color get destaque => paleta.destaque;
   static Color get sobreDestaque => paleta.sobreDestaque;
 
-  /// Sombra leve dos cartões (no modo escuro quase não aparece).
   static List<BoxShadow> get sombra => [
         BoxShadow(color: Colors.black.withValues(alpha: paleta.escura ? 0.30 : 0.08), blurRadius: 3, offset: const Offset(0, 1)),
       ];

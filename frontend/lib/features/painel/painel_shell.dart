@@ -29,9 +29,7 @@ import 'telas.dart';
 import 'widgets/barra_filtros.dart';
 import 'widgets/menu_lateral.dart';
 
-/// Casca do painel: menu lateral, barra de filtros e a tela selecionada (US05, US06).
-/// Os filtros são um só para todas as telas, como no protótipo. O menu e as telas
-/// disponíveis dependem do papel do [usuario] logado (US11).
+/// Casca do painel: menu lateral, barra de filtros e a tela selecionada.
 class PainelShell extends StatefulWidget {
   const PainelShell({
     super.key,
@@ -55,30 +53,22 @@ class PainelShell extends StatefulWidget {
   final Usuario usuario;
   final VoidCallback onSair;
 
-  /// Só o administrador precisa dele (tela Usuários).
   final AuthRepository? authRepository;
   final FiltrosPainel? filtrosIniciais;
   final Tela telaInicial;
 
-  /// Modo claro/escuro (botão no rodapé do menu); sem ele o botão não aparece.
   final ControleTema? tema;
 
-  /// Menu recolhido que abre ao passar o mouse (desktop). Desligado nos testes, que tocam direto nos itens.
   final bool menuRetratil;
 
-  /// Intervalo de atualização automática da tela Monitoramento (`null` desliga, usado nos testes).
   final Duration? intervaloMonitoramento;
-  /// Como o PDF da tela Relatórios chega ao usuário (nos testes é substituído).
   final SalvarPdf salvarPdf;
   final Future<Uint8List?> Function() brasaoPdf;
 
-  /// Chamado quando o usuário salva o "Meu perfil", para o app passar a mostrar o nome e a foto novos.
   final ValueChanged<Usuario>? onUsuarioAtualizado;
 
-  /// Como a foto do perfil é escolhida (nos testes é substituída).
   final EscolherFoto escolherFoto;
 
-  /// Guarda no aparelho se o menu ficou travado aberto (desligado nos testes).
   final bool lembrarMenu;
 
   @override
@@ -90,10 +80,8 @@ class _PainelShellState extends State<PainelShell> {
   late Tela _tela;
   List<Linha> _linhas = const [];
 
-  /// Linha aberta na tela de linhas (vinda da tabela de monitoramento ou da própria lista).
   String? _linhaAberta;
 
-  /// Menu lateral travado aberto pelo alfinete (só no desktop, onde ele recolhe).
   bool _menuFixo = false;
 
   @override

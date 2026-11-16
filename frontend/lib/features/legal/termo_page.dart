@@ -36,13 +36,11 @@ Future<void> mostrarTermo(BuildContext context) {
 }
 
 /// Tela mostrada depois do login enquanto o usuário não aceita a versão atual do termo (LGPD).
-/// Sem o aceite o painel não abre; a outra saída é sair da conta.
 class TermoPage extends StatefulWidget {
   const TermoPage({super.key, required this.nome, required this.onAceitar, required this.onSair});
 
   final String nome;
 
-  /// Registra o aceite; se lançar erro, a mensagem aparece na tela.
   final Future<void> Function() onAceitar;
   final VoidCallback onSair;
 

@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Lembra, no aparelho, se o usuário deixou o menu lateral travado aberto (US06).
+/// Lembra, no aparelho, se o usuário deixou o menu lateral travado aberto.
 class PreferenciaMenu {
   PreferenciaMenu._();
 

@@ -6,7 +6,6 @@ import 'cartao.dart';
 import 'sparkline.dart';
 
 /// Cartão de indicador: rótulo, valor grande, linha de detalhe e tendência.
-/// Exibe "Sem dados" quando o valor é nulo (RN06).
 class KpiCard extends StatelessWidget {
   const KpiCard({
     super.key,
@@ -23,22 +22,17 @@ class KpiCard extends StatelessWidget {
 
   final String titulo;
 
-  /// Valor já formatado; `null` quando não há dado.
   final String? valor;
   final String? unidade;
 
-  /// Texto pequeno abaixo do valor ("261.887 km produtiva · 5,0% improdutiva").
   final String? detalhe;
 
-  /// Variação percentual em relação ao período anterior; `null` esconde a etiqueta.
   final double? variacao;
   final String rotuloVariacao;
 
-  /// Etiqueta personalizada, no lugar da variação (ex.: "72,5% do total").
   final Widget? etiqueta;
   final List<double> serie;
 
-  /// Cor da tendência; sem ela, a cor de destaque da paleta.
   final Color? cor;
 
   @override
@@ -105,7 +99,6 @@ class EtiquetaVariacao extends StatelessWidget {
   final double variacao;
   final String rotulo;
 
-  /// Para indicadores em que cair é bom (ocorrências), inverte as cores.
   final bool quedaEBoa;
 
   @override

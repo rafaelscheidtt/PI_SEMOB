@@ -62,8 +62,7 @@ class DashMobApp extends StatelessWidget {
   }
 }
 
-/// Decide entre a tela de login e o painel (US11): tenta a sessão guardada, senão pede login;
-/// quando a API responde 401 (token vencido ou usuário desativado) volta para o login.
+/// Decide entre a tela de login e o painel. Com 401 da API, volta para o login.
 class AppRaiz extends StatefulWidget {
   const AppRaiz({super.key, required this.sessao, required this.armazenamento, required this.auth, required this.repository, this.tema, this.menuRetratil = true});
 
@@ -72,10 +71,8 @@ class AppRaiz extends StatefulWidget {
   final AuthRepository auth;
   final IndicadoresRepository repository;
 
-  /// Modo claro/escuro; sem ele o botão de alternar não aparece.
   final ControleTema? tema;
 
-  /// Menu lateral recolhido que abre ao passar o mouse (desligado nos testes).
   final bool menuRetratil;
 
   @override

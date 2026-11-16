@@ -1,7 +1,4 @@
-/// Texto do termo de uso e aviso de privacidade (LGPD, Lei 13.709/2018).
-///
-/// Mudou alguma coisa aqui? Troque também `TERMO_VERSAO` em
-/// backend/app/repositories/usuarios.py: é o que faz todo mundo ler e aceitar de novo.
+/// Texto do termo de uso e aviso de privacidade. Se mudar o texto, trocar também TERMO_VERSAO em backend/app/repositories/usuarios.py.
 library;
 
 const versaoDoTermo = '1.0';

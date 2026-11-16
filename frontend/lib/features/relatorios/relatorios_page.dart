@@ -27,7 +27,7 @@ Future<Uint8List?> carregarBrasao() async {
   }
 }
 
-/// Relatórios: exporta o painel do período em PDF, com as seções escolhidas (US10).
+/// Relatórios: exporta o painel do período em PDF, com as seções escolhidas.
 class RelatoriosPage extends StatefulWidget {
   const RelatoriosPage({super.key, required this.filtros, required this.repository, this.usuario, this.salvar = salvarPdfNoAparelho, this.brasao = carregarBrasao});
 

@@ -40,7 +40,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# todas as rotas de dados exigem login (US11); /login e /health ficam abertas
+# todas as rotas de dados exigem login; /login e /health ficam abertas
 app.include_router(usuarios.router)
 app.include_router(indicadores.router, dependencies=[Depends(usuario_atual)])
 app.include_router(importacoes.router, dependencies=[Depends(usuario_atual)])

@@ -37,7 +37,7 @@ class MensagemErro extends StatelessWidget {
   }
 }
 
-/// Aviso de período sem dados (RN06): nunca mostramos zero no lugar.
+/// Aviso de período sem dados: nunca mostramos zero no lugar.
 class AvisoSemDados extends StatelessWidget {
   const AvisoSemDados({super.key, this.texto = 'Sem dados para o período selecionado'});
 
@@ -85,7 +85,7 @@ class Aviso extends StatelessWidget {
   }
 }
 
-/// Faixa de destaque da Visão Geral quando o período tem alertas (US08).
+/// Faixa de destaque da Visão Geral quando o período tem alertas.
 class FaixaAlertas extends StatelessWidget {
   const FaixaAlertas({super.key, required this.alertas, this.onVer});
 

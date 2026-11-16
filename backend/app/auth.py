@@ -1,4 +1,4 @@
-"""Dependências de autenticação das rotas (US11).
+"""Dependências de autenticação das rotas.
 
     usuario = Depends(usuario_atual)                 -> qualquer usuário logado
     usuario = Depends(exigir_papel("administrador")) -> só os papéis indicados

@@ -13,15 +13,13 @@ import '../widgets/estados.dart';
 import '../widgets/grafico_colunas.dart';
 import '../widgets/kpi_card.dart';
 
-/// Financeiro: vendas, utilização, crédito circulante e saldo de créditos da bilhetagem (US07, RN12).
-/// A bilhetagem é do sistema inteiro e só existe desde o fim do Tarifa Zero (15/07/2026).
+/// Financeiro: vendas, utilização, crédito circulante e saldo de créditos da bilhetagem.
 class FinanceiroPage extends StatefulWidget {
   const FinanceiroPage({super.key, required this.filtros, required this.repository, this.onGranularidade});
 
   final FiltrosPainel filtros;
   final IndicadoresRepository repository;
 
-  /// Troca a granularidade dos gráficos (dia, semana, mês); os cartões de total não dependem dela.
   final ValueChanged<Granularidade>? onGranularidade;
 
   @override
@@ -98,7 +96,6 @@ class _FinanceiroPageState extends State<FinanceiroPage> {
     });
   }
 
-  /// Aviso sobre o Tarifa Zero quando o período começa antes da bilhetagem.
   Widget? _avisoBilhetagem(Financeiro d) {
     final inicio = d.inicioBilhetagem;
     if (inicio == null || !widget.filtros.inicio.isBefore(inicio)) return null;

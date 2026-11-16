@@ -1,4 +1,4 @@
-"""Coleção `usuarios` (US11/US13): quem pode entrar no painel e com qual papel."""
+"""Coleção `usuarios`: quem pode entrar no painel e com qual papel."""
 import base64
 import binascii
 from datetime import datetime, timezone

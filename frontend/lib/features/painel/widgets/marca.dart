@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 class MarcaDashMob extends StatelessWidget {
   const MarcaDashMob({super.key, this.tamanho = 20, this.cor = Colors.white, this.fio = const Color(0xFFFFEF0A)});
 
-  /// Tamanho da letra; o fio e os espaços acompanham.
   final double tamanho;
   final Color cor;
   final Color fio;

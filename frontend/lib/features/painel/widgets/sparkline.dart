@@ -9,7 +9,6 @@ class Sparkline extends StatelessWidget {
 
   final List<double> valores;
 
-  /// Sem cor, usa a cor de destaque da paleta (navy no claro, azul-claro no escuro).
   final Color? cor;
   final double altura;
 

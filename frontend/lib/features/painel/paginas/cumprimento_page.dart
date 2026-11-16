@@ -13,14 +13,13 @@ import '../widgets/estados.dart';
 import '../widgets/grafico_colunas.dart';
 import '../widgets/kpi_card.dart';
 
-/// Cumprimento de viagens: FCV do período, por turno e ao longo do tempo (US03, RN08).
+/// Cumprimento de viagens: FCV do período, por turno e ao longo do tempo.
 class CumprimentoPage extends StatefulWidget {
   const CumprimentoPage({super.key, required this.filtros, required this.repository, this.onGranularidade});
 
   final FiltrosPainel filtros;
   final IndicadoresRepository repository;
 
-  /// Troca a granularidade dos gráficos (dia, semana, mês); os cartões de total não dependem dela.
   final ValueChanged<Granularidade>? onGranularidade;
 
   @override
@@ -33,7 +32,6 @@ class _CumprimentoPageState extends State<CumprimentoPage> {
   String? _erro;
   bool _carregando = true;
 
-  /// Aproxima a escala do gráfico de FCV para a variação dos décimos aparecer (padrão: 0 a 100%).
   bool _aproximar = false;
 
   @override

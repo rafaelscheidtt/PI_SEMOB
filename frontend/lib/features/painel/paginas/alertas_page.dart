@@ -12,7 +12,7 @@ import '../widgets/cartao.dart';
 import '../widgets/estados.dart';
 import '../widgets/kpi_card.dart';
 
-/// Alertas: dias fora do padrão no período (US08, RN09 a RN11), agrupados por data.
+/// Alertas: dias fora do padrão no período, agrupados por data.
 class AlertasPage extends StatefulWidget {
   const AlertasPage({super.key, required this.filtros, required this.repository});
 

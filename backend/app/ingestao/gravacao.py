@@ -1,4 +1,4 @@
-"""Gravação dos registros no MongoDB com upsert (RN04).
+"""Gravação dos registros no MongoDB com upsert.
 
 operacao_diaria tem um documento por dia e cada relatório grava só os seus campos,
 então a ordem de importação não importa.

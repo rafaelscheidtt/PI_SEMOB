@@ -17,7 +17,6 @@ class Cartao extends StatelessWidget {
   final String? titulo;
   final String? subtitulo;
 
-  /// Widget alinhado à direita do título (etiqueta, legenda, botão).
   final Widget? acao;
   final EdgeInsets padding;
 
@@ -44,7 +43,6 @@ class Cartao extends StatelessWidget {
     );
   }
 
-  /// Título à esquerda e a ação à direita; em cartões estreitos a ação desce para baixo do título.
   Widget _cabecalho(BuildContext context) {
     final tema = Theme.of(context).textTheme;
     final titulos = Column(

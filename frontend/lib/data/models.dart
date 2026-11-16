@@ -1,5 +1,4 @@
 /// Modelos das respostas da API.
-/// Passageiros podem vir nulos (consulta por linha ou período sem bilhetagem).
 class Medidas {
   const Medidas({
     required this.kmTotal,
@@ -27,10 +26,8 @@ class Medidas {
   final int diasComDados;
   final int diasComPassageiros;
 
-  /// Quilometragem improdutiva, quando a API informa a produtiva.
   double? get kmImprodutiva => kmProdutiva == null ? null : kmTotal - kmProdutiva!;
 
-  /// Viagens que estavam programadas e não aconteceram.
   int? get viagensNaoRealizadas => viagensProgramadas == null ? null : viagensProgramadas! - viagens;
 
   static Medidas fromJson(Map<String, dynamic> j) => Medidas(
@@ -119,7 +116,6 @@ class Indicadores {
 }
 
 /// Variação percentual de um valor em relação ao período anterior.
-/// Devolve `null` quando não dá para comparar (sem período anterior ou base zero).
 double? variacaoPercentual(num? atual, num? anterior) {
   if (atual == null || anterior == null || anterior == 0) return null;
   return (atual - anterior) / anterior * 100;
@@ -382,7 +378,7 @@ class ArquivoEnvio {
   final List<int> bytes;
 }
 
-/// Papel do usuário (US11): define o que aparece no menu e o que a API permite.
+/// Papel do usuário: define o que aparece no menu e o que a API permite.
 enum Papel {
   administrador('administrador', 'Administrador', 'Tudo, mais o cadastro de usuários'),
   gestor('gestor', 'Gestor', 'Painel completo e importação de relatórios'),
@@ -406,13 +402,10 @@ class Usuario {
   final Papel papel;
   final bool ativo;
 
-  /// Foto do perfil como data URL ("data:image/png;base64,..."); `null` para quem não pôs foto.
   final String? foto;
 
-  /// Falta ler e aceitar a versão atual do termo de uso e aviso de privacidade (LGPD).
   final bool termoPendente;
 
-  /// Primeira letra do primeiro e do último nome ("Ana Maria Admin" -> "AA"), para o avatar sem foto.
   String get iniciais {
     final partes = nome.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
     if (partes.isEmpty) return '?';
@@ -475,7 +468,7 @@ class PontoFinanceiro {
       );
 }
 
-/// Totais financeiros do período (US07).
+/// Totais financeiros do período.
 class TotaisFinanceiro {
   const TotaisFinanceiro({
     required this.vendas,
@@ -523,8 +516,7 @@ class FinanceiroAnterior {
       );
 }
 
-/// Resposta financeira do período. [inicioBilhetagem] é o primeiro dia com dado financeiro
-/// no banco, para explicar períodos vazios (antes do fim do Tarifa Zero não havia bilhetagem).
+/// Resposta financeira do período.
 class Financeiro {
   const Financeiro({required this.semDados, required this.serie, this.totais, this.anterior, this.inicioBilhetagem});
 
@@ -545,7 +537,7 @@ class Financeiro {
   static const vazio = Financeiro(semDados: true, serie: []);
 }
 
-/// Gravidade de um alerta (US08).
+/// Gravidade de um alerta.
 enum Severidade {
   aviso('aviso', 'Aviso'),
   critico('critico', 'Crítico');
@@ -573,10 +565,8 @@ class Alerta {
 
   final DateTime data;
 
-  /// `cumprimento`, `historico` ou `ocorrencias`.
   final String tipo;
 
-  /// `fcv`, `km_total`, `viagens_realizadas`, `passageiros_total` ou `ocorrencias`.
   final String indicador;
   final Severidade severidade;
   final double valor;
@@ -597,7 +587,6 @@ class Alerta {
         linha: j['linha'] as String?,
       );
 
-  /// Nome do tipo para a tela ("Cumprimento", "Padrão histórico", "Ocorrências").
   String get tipoRotulo => switch (tipo) {
         'cumprimento' => 'Cumprimento',
         'historico' => 'Padrão histórico',
@@ -626,6 +615,5 @@ class Alertas {
 
   static const vazio = Alertas(total: 0, criticos: 0, avisos: 0, alertas: []);
 
-  /// Quantos dias diferentes têm pelo menos um alerta.
   int get diasComAlerta => alertas.map((a) => a.data).toSet().length;
 }
