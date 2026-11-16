@@ -5,6 +5,7 @@ import '../../core/tema_controle.dart';
 import '../../data/auth_repository.dart';
 import '../../data/models.dart';
 import '../painel/widgets/estados.dart';
+import '../painel/widgets/marca.dart';
 
 /// Tela de entrada do painel (US11): e-mail e senha, nada de cadastro por aqui —
 /// quem cria usuário é o administrador, dentro do app.
@@ -60,13 +61,24 @@ class _LoginPageState extends State<LoginPage> {
     final tema = Theme.of(context).textTheme;
     return Scaffold(
       backgroundColor: Cores.navy,
-      body: Center(
+      body: Stack(fit: StackFit.expand, children: [
+        // foto do Palácio da Cerâmica (sede da Prefeitura), escurecida pelo azul para não brigar com o formulário
+        Image.asset('assets/fundo_login.jpg', fit: BoxFit.cover, errorBuilder: (context, erro, pilha) => const SizedBox.shrink()),
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xCC181949), Color(0xED181949)]),
+          ),
+        ),
+        Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 400),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(28, 32, 28, 28),
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              const _AssinaturaPrefeitura(),
+              const SizedBox(height: 24),
+              Container(
+              padding: const EdgeInsets.fromLTRB(28, 26, 28, 28),
               decoration: BoxDecoration(color: Cores.superficie, borderRadius: BorderRadius.circular(14)),
               child: Form(
                 key: _form,
@@ -85,22 +97,8 @@ class _LoginPageState extends State<LoginPage> {
                           visualDensity: VisualDensity.compact,
                         ),
                       ),
-                    Center(
-                      child: Container(
-                        width: 72,
-                        height: 72,
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(color: Cores.fundo, borderRadius: BorderRadius.circular(12)),
-                        child: Image.asset(
-                          'assets/brasao_scs.png',
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, erro, pilha) => const Icon(Icons.location_city, color: Cores.navy, size: 40),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text('DashMOB', textAlign: TextAlign.center, style: tema.titleLarge),
-                    const SizedBox(height: 4),
+                    Center(child: MarcaDashMob(tamanho: 28, cor: Cores.tinta, fio: Cores.paleta.escura ? const Color(0xFFFFEF0A) : const Color(0xFFF2C80F))),
+                    const SizedBox(height: 10),
                     Text('Painel de operação · SEMOB São Caetano do Sul', textAlign: TextAlign.center, style: tema.bodySmall),
                     const SizedBox(height: 24),
                     if (widget.aviso != null && _erro == null) ...[Aviso(widget.aviso!, chave: const Key('login-aviso')), const SizedBox(height: 14)],
@@ -149,8 +147,29 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
+            ]),
           ),
         ),
+      ),
+      ]),
+    );
+  }
+}
+
+/// Brasão da Prefeitura, centralizado em cima do cartão de login.
+class _AssinaturaPrefeitura extends StatelessWidget {
+  const _AssinaturaPrefeitura();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Image.asset(
+        'assets/brasao.png',
+        height: 104,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.medium,
+        semanticLabel: 'Brasão da Prefeitura de São Caetano do Sul',
+        errorBuilder: (context, erro, pilha) => const Icon(Icons.location_city, color: Colors.white, size: 56),
       ),
     );
   }

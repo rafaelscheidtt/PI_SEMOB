@@ -4,6 +4,7 @@ import '../../../core/tema.dart';
 import '../../../core/tema_controle.dart';
 import '../../../data/models.dart';
 import '../telas.dart';
+import 'marca.dart';
 
 /// Largura do menu aberto e recolhido (só ícones).
 const larguraMenuAberto = 256.0;
@@ -50,7 +51,6 @@ class MenuLateral extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _Logo(compacto: compacto),
-          const SizedBox(height: 10),
           if (!compacto) const _TituloGrupo('Operação'),
           for (final t in operacao) item(t),
           if (gestao.isNotEmpty) ...[
@@ -142,31 +142,36 @@ class _Logo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // brasão da Prefeitura de São Caetano do Sul
-    final brasao = Container(
-      width: 44,
-      height: 44,
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
-      child: Image.asset(
-        'assets/brasao_scs.png',
-        fit: BoxFit.contain,
-        errorBuilder: (context, erro, pilha) => const Icon(Icons.location_city, color: Cores.navy, size: 28),
-      ),
-    );
+    // brasão da Prefeitura de São Caetano do Sul, direto sobre o azul do menu (o arquivo tem fundo transparente)
+    Widget brasao(double altura) => Image.asset(
+          'assets/brasao.png',
+          height: altura,
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.medium,
+          errorBuilder: (context, erro, pilha) => Icon(Icons.location_city, color: Colors.white, size: altura * 0.7),
+        );
+    const divisa = BoxDecoration(border: Border(bottom: BorderSide(color: Cores.menuEtiqueta)));
     if (compacto) {
-      return Padding(padding: const EdgeInsets.only(top: 4, bottom: 16), child: Center(child: brasao));
+      return Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.only(bottom: 14),
+        decoration: divisa,
+        child: Center(child: brasao(42)),
+      );
     }
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 4, 8, 16),
+    // assinatura: brasão, um fio vertical e o nome do painel com a secretaria embaixo
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.fromLTRB(6, 0, 6, 14),
+      decoration: divisa,
       child: Row(children: [
-        brasao,
-        const SizedBox(width: 10),
+        brasao(46),
+        Container(width: 1, height: 36, margin: const EdgeInsets.symmetric(horizontal: 12), color: Colors.white.withValues(alpha: 0.18)),
         const Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text('PREFEITURA DE', style: TextStyle(color: Color(0xFF9EA2C7), fontSize: 9, letterSpacing: 1.4)),
-            Text('São Caetano do Sul', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
-            Text('SEMOB · DashMOB', style: TextStyle(color: Color(0xFF9EA2C7), fontSize: 11)),
+            MarcaDashMob(tamanho: 19),
+            SizedBox(height: 6),
+            Text('SEMOB · São Caetano do Sul', style: TextStyle(color: Color(0xFF9EA2C7), fontSize: 10.5), maxLines: 1, overflow: TextOverflow.ellipsis),
           ]),
         ),
       ]),
@@ -199,15 +204,27 @@ class _ItemMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cor = ativo ? Colors.white : Cores.menuTexto;
+    // marca fina na cor da tela, só no item aberto
+    final marca = AnimatedContainer(
+      duration: _duracao,
+      width: 3,
+      height: 18,
+      decoration: BoxDecoration(color: ativo ? tela.cor : tela.cor.withValues(alpha: 0), borderRadius: BorderRadius.circular(2)),
+    );
     final conteudo = compacto
         ? Tooltip(
             message: tela.rotulo,
             waitDuration: const Duration(milliseconds: 300),
-            child: Padding(padding: const EdgeInsets.symmetric(vertical: 11), child: Center(child: Icon(tela.icone, size: 18, color: cor))),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 11),
+              child: Row(children: [marca, Expanded(child: Center(child: Icon(tela.icone, size: 18, color: cor))), const SizedBox(width: 3)]),
+            ),
           )
         : Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+            padding: const EdgeInsets.only(right: 10, top: 9, bottom: 9),
             child: Row(children: [
+              marca,
+              const SizedBox(width: 9),
               Icon(tela.icone, size: 16, color: cor),
               const SizedBox(width: 10),
               Expanded(
@@ -220,18 +237,24 @@ class _ItemMenu extends StatelessWidget {
               ),
             ]),
           );
-    return Material(
-      color: ativo ? Cores.navyClaro : Colors.transparent,
-      borderRadius: BorderRadius.circular(7),
-      child: InkWell(
-        key: Key('menu-${tela.name}'),
-        borderRadius: BorderRadius.circular(7),
-        onTap: onTap,
-        child: conteudo,
+    return AnimatedContainer(
+      duration: _duracao,
+      decoration: BoxDecoration(color: ativo ? Cores.navyClaro : Cores.navyClaro.withValues(alpha: 0), borderRadius: BorderRadius.circular(7)),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          key: Key('menu-${tela.name}'),
+          borderRadius: BorderRadius.circular(7),
+          hoverColor: Colors.white.withValues(alpha: 0.06),
+          onTap: onTap,
+          child: conteudo,
+        ),
       ),
     );
   }
 }
+
+const _duracao = Duration(milliseconds: 180);
 
 class _Usuario extends StatelessWidget {
   const _Usuario({required this.usuario, required this.onSair, this.compacto = false, this.tema});

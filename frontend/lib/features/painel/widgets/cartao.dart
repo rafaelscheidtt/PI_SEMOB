@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/tema.dart';
 
-/// Cartão branco com borda fina, a base de todos os blocos do painel.
+/// Cartão branco com sombra leve, a base de todos os blocos do painel.
 class Cartao extends StatelessWidget {
   const Cartao({
     super.key,
@@ -27,8 +27,8 @@ class Cartao extends StatelessWidget {
       padding: padding,
       decoration: BoxDecoration(
         color: Cores.superficie,
-        border: Border.all(color: Cores.linha),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: Cores.sombra,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

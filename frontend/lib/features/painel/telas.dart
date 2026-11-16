@@ -40,6 +40,29 @@ enum Tela {
     }
   }
 
+  /// Nome do grupo do menu, usado no cabeçalho ("Operação • Visão Geral").
+  String get grupo => administracao ? 'Administração' : (gestao ? 'Gestão' : 'Operação');
+
+  /// Cor da tela: um detalhe fino no item do menu e embaixo do cabeçalho, para situar quem está navegando.
+  /// Todas saem do brasão de São Caetano do Sul (azul, verde, vermelho e o amarelo da coroa), mais o cinza.
+  Color get cor => switch (this) {
+        Tela.visaoGeral || Tela.executiva => _azul,
+        Tela.monitoramento => _azulClaro,
+        Tela.linhas => _amarelo,
+        Tela.cumprimento || Tela.financeiro => _verde,
+        Tela.passageiros => _ouro,
+        Tela.alertas => _vermelho,
+        Tela.importacao || Tela.relatorios || Tela.usuarios => _cinza,
+      };
+
+  static const _azul = Color(0xFF3F66C4); // azul do brasão, um tom mais claro para aparecer no menu
+  static const _azulClaro = Color(0xFF4A86CF);
+  static const _verde = Color(0xFF078944);
+  static const _vermelho = Color(0xFFD42027);
+  static const _amarelo = Color(0xFFF2C80F);
+  static const _ouro = Color(0xFFA07C00);
+  static const _cinza = Color(0xFF5F6673);
+
   static List<Tela> permitidas(Papel papel) => values.where((t) => t.permitidaPara(papel)).toList();
 
   /// Tela em que cada papel cai depois do login (US09: o executivo vai direto para a visão executiva).

@@ -1,0 +1,7 @@
+Fonte do DashMOB
+================
+
+TeX Gyre Heros (Heros-Regular.otf e Heros-Bold.otf), do GUST e-foundry.
+E uma versao livre da Helvetica, a letra classica da sinalizacao de transporte.
+Licenca: GUST Font License (arquivo GUST-FONT-LICENSE.txt nesta pasta), que permite
+usar e distribuir a fonte junto com o app.

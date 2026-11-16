@@ -104,7 +104,7 @@ class GraficoColunas extends StatelessWidget {
                 ];
                 return BarTooltipItem(
                   '${rotulos[i]}\n${linhas.join('\n')}',
-                  const TextStyle(color: Colors.white, fontSize: 12),
+                  const TextStyle(color: Colors.white, fontSize: 12, fontFamily: fonteDashMob),
                 );
               },
             ),

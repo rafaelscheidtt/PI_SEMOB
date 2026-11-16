@@ -21,7 +21,7 @@ Future<void> salvarPdfNoAparelho(Uint8List bytes, String nome) => Printing.share
 /// Lê o PNG do brasão dos assets para o cabeçalho do PDF; sem ele o relatório sai só com texto.
 Future<Uint8List?> carregarBrasao() async {
   try {
-    return (await rootBundle.load('assets/brasao_scs.png')).buffer.asUint8List();
+    return (await rootBundle.load('assets/brasao.png')).buffer.asUint8List();
   } catch (_) {
     return null;
   }

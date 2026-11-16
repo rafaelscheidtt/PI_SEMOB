@@ -28,4 +28,11 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/brasao_scs.png
+    - assets/brasao.png
+    - assets/fundo_login.jpg
+  fonts:
+    - family: Heros
+      fonts:
+        - asset: assets/fontes/Heros-Regular.otf
+        - asset: assets/fontes/Heros-Bold.otf
+          weight: 700

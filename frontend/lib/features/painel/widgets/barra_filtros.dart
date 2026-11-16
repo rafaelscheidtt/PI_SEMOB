@@ -6,7 +6,8 @@ import '../../../core/periodo.dart';
 import '../../../core/tema.dart';
 import '../../../data/models.dart';
 
-/// Barra superior com o título e os filtros que valem para a tela inteira: intervalo e linha (US05).
+/// Barra superior com o nome da tela e os filtros que valem para a tela inteira: intervalo e linha (US05).
+/// Um filete na cor da tela acompanha a base da barra.
 /// A granularidade (dia, semana, mês) só muda os gráficos, por isso fica junto deles ([SeletorGranularidade]).
 class BarraFiltros extends StatelessWidget {
   const BarraFiltros({
@@ -16,6 +17,8 @@ class BarraFiltros extends StatelessWidget {
     required this.compacto,
     required this.onFiltros,
     this.titulo = 'Gestão Operacional de Transporte Público',
+    this.grupo,
+    this.cor,
   });
 
   final FiltrosPainel filtros;
@@ -23,6 +26,12 @@ class BarraFiltros extends StatelessWidget {
   final bool compacto;
   final ValueChanged<FiltrosPainel> onFiltros;
   final String titulo;
+
+  /// Grupo do menu, escrito em cinza antes do título ("Operação / Visão Geral").
+  final String? grupo;
+
+  /// Cor do filete embaixo da barra (a da tela aberta); sem ela, só a linha cinza.
+  final Color? cor;
 
   Future<void> _escolherIntervalo(BuildContext context) async {
     final r = await showDateRangePicker(
@@ -43,7 +52,7 @@ class BarraFiltros extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         foregroundColor: Cores.tinta,
         side: BorderSide(color: Cores.linha),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         textStyle: const TextStyle(fontSize: 13),
       ),
@@ -51,8 +60,8 @@ class BarraFiltros extends StatelessWidget {
       label: Text('${fmtData(filtros.inicio)} – ${fmtData(filtros.fim)}'),
     );
     final seletorLinha = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(border: Border.all(color: Cores.linha), borderRadius: BorderRadius.circular(7)),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      decoration: BoxDecoration(border: Border.all(color: Cores.linha), borderRadius: BorderRadius.circular(6)),
       child: DropdownButton<String?>(
         key: const Key('seletor-linha'),
         value: filtros.linha,
@@ -71,17 +80,27 @@ class BarraFiltros extends StatelessWidget {
     );
 
     final controles = [botaoIntervalo, seletorLinha];
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: compacto ? 14 : 28, vertical: 12),
-      decoration: BoxDecoration(color: Cores.superficie, border: Border(bottom: BorderSide(color: Cores.linha))),
+    final barra = Container(
+      padding: EdgeInsets.symmetric(horizontal: compacto ? 14 : 28, vertical: compacto ? 10 : 12),
+      color: Cores.superficie,
       child: compacto
           ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              for (final c in controles) Padding(padding: const EdgeInsets.only(bottom: 8), child: c),
+              botaoIntervalo,
+              const SizedBox(height: 8),
+              seletorLinha,
             ])
           : Row(children: [
               // o título ocupa só o que precisa; os filtros ficam encostados na direita
               Expanded(
-                child: Text(titulo, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                child: Text.rich(
+                  TextSpan(children: [
+                    if (grupo != null) TextSpan(text: '$grupo  /  ', style: TextStyle(color: Cores.texto2, fontWeight: FontWeight.w400)),
+                    TextSpan(text: titulo),
+                  ]),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Cores.tinta),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -99,6 +118,25 @@ class BarraFiltros extends StatelessWidget {
               ),
             ]),
     );
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      barra,
+      FileteDaTela(cor: cor),
+    ]);
+  }
+}
+
+/// Filete fino na cor da tela aberta; troca de cor suavemente quando o usuário muda de tela.
+class FileteDaTela extends StatelessWidget implements PreferredSizeWidget {
+  const FileteDaTela({super.key, required this.cor});
+
+  final Color? cor;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(2);
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(duration: const Duration(milliseconds: 250), curve: Curves.easeOut, height: cor == null ? 1 : 2, color: cor ?? Cores.linha);
   }
 }
 

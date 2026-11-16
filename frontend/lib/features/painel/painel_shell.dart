@@ -169,9 +169,16 @@ class _PainelShellState extends State<PainelShell> {
         filtros: _filtros,
         linhas: _linhas,
         compacto: faixa == FaixaLargura.compacto,
+        titulo: _tela.rotulo,
+        grupo: _tela.grupo,
+        cor: _tela.cor,
         onFiltros: (f) => setState(() => _filtros = f),
       );
-      final corpo = Column(children: [if (_tela != Tela.usuarios) barra, Expanded(child: _conteudo())]);
+      // cada tela entra com um esmaecimento curto, para a troca não ser seca
+      final corpo = Column(children: [
+        if (_tela != Tela.usuarios) barra,
+        Expanded(child: _Entrada(key: ValueKey('entrada-${_tela.name}'), child: _conteudo())),
+      ]);
 
       if (faixa == FaixaLargura.expandido) {
         return Scaffold(body: Row(children: [menu, Expanded(child: corpo)]));
@@ -180,11 +187,44 @@ class _PainelShellState extends State<PainelShell> {
         appBar: AppBar(
           backgroundColor: Cores.navy,
           foregroundColor: Colors.white,
+          bottom: FileteDaTela(cor: _tela.cor),
           title: Text(_tela.rotulo, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
         ),
         drawer: Drawer(backgroundColor: Cores.navy, width: 272, child: SafeArea(child: menu)),
         body: corpo,
       );
     });
+  }
+}
+
+/// Faz o conteúdo aparecer aos poucos (esmaece e sobe alguns pixels) quando a tela é trocada.
+class _Entrada extends StatefulWidget {
+  const _Entrada({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<_Entrada> createState() => _EntradaState();
+}
+
+class _EntradaState extends State<_Entrada> with SingleTickerProviderStateMixin {
+  late final AnimationController _controle = AnimationController(vsync: this, duration: const Duration(milliseconds: 220))..forward();
+  late final Animation<double> _curva = CurvedAnimation(parent: _controle, curve: Curves.easeOut);
+
+  @override
+  void dispose() {
+    _controle.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _curva,
+      child: SlideTransition(
+        position: Tween<Offset>(begin: const Offset(0, 0.012), end: Offset.zero).animate(_curva),
+        child: widget.child,
+      ),
+    );
   }
 }

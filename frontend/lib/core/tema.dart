@@ -41,9 +41,9 @@ class Paleta {
 
   /// As cores do protótipo no Figma.
   static const clara = Paleta(
-    fundo: Color(0xFFF5F6FA),
+    fundo: Color(0xFFF3F3F4),
     superficie: Colors.white,
-    linha: Color(0xFFE6E8EF),
+    linha: Color(0xFFE4E5EA),
     tinta: Color(0xFF1B1F2E),
     texto2: Color(0xFF6B7280),
     verdeSuave: Color(0xFFE3F4EE),
@@ -105,12 +105,20 @@ class Cores {
   static Color get destaque => paleta.destaque;
   static Color get sobreDestaque => paleta.sobreDestaque;
 
+  /// Sombra leve dos cartões (no modo escuro quase não aparece).
+  static List<BoxShadow> get sombra => [
+        BoxShadow(color: Colors.black.withValues(alpha: paleta.escura ? 0.30 : 0.08), blurRadius: 3, offset: const Offset(0, 1)),
+      ];
+
   // menu lateral (sempre escuro)
   static const menuTexto = Color(0xFFC9CBE3);
   static const menuApagado = Color(0xFF6F73A3);
   static const menuTitulo = Color(0xFF8A8EB8);
   static const menuEtiqueta = Color(0xFF2C2E6B);
 }
+
+/// Letra do painel: TeX Gyre Heros, versão livre da Helvetica (a da sinalização de transporte).
+const fonteDashMob = 'Heros';
 
 ThemeData temaDashMob() => _tema(Paleta.clara);
 
@@ -129,6 +137,7 @@ ThemeData _tema(Paleta p) {
   );
   return ThemeData(
     useMaterial3: true,
+    fontFamily: fonteDashMob,
     brightness: brilho,
     colorScheme: esquema,
     scaffoldBackgroundColor: p.fundo,
