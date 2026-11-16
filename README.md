@@ -21,7 +21,7 @@ frontend/   app em Flutter (web, desktop e mobile)
 atalhos/    atalhos de dois cliques para Mac e Windows (testes, API, app)
 dados/      relatórios da SEMOB (semob/) e um pacote fictício para os testes (exemplo/)
 scripts/    scripts de apoio (setup, geração do pacote de exemplo)
-docs/       guia de como rodar e evidências de testes
+docs/       guia de como rodar e evidências de testes das duas sprints
 ```
 
 O app só conversa com a API, e só a API acessa o banco.
@@ -235,18 +235,18 @@ arquivo do CI: ao atualizar o Flutter do grupo, atualize lá também.
 
 ## Fluxo de trabalho
 
-Usamos Git Flow: `main` tem a versão apresentada à SEMOB, `develop` junta o trabalho da sprint
-e cada história é feita numa branch `feature/USxx-...`, que entra em `develop` por pull request
-revisado por outra pessoa do grupo. Os commits seguem o Conventional Commits, com a história
-no escopo (ex.: `feat(US02): ...`).
+Usamos um Git Flow enxuto: `main` tem a versão apresentada à SEMOB e só recebe a `develop` por pull
+request, com os testes do GitHub passando. A `develop` junta o trabalho da sprint: cada história entra
+num commit de quem fez, depois de rodar o `1 - rodar testes` na própria máquina. Os commits seguem o
+Conventional Commits, com a história no escopo (ex.: `feat(US02): ...`).
 
 ## Equipe
 
 | Nome | R.A. | GitHub |
 |------|------|--------|
-| Luigi Battistini (PO) | 25.01439-0 | |
-| Matheus Anderson Moraes (Scrum Master) | 25.01481-2 | |
+| Luigi Battistini (PO) | 25.01439-0 | [@Battistinii](https://github.com/Battistinii) |
+| Matheus Anderson Moraes (Scrum Master) | 25.01481-2 | [@matheusanderson18](https://github.com/matheusanderson18) |
 | Rafael Scheidt Reschke | 25.00356-7 | [@rafaelscheidtt](https://github.com/rafaelscheidtt) |
-| Thales Xavier von Tein | 25.01250-1 | |
+| Thales Xavier von Tein | 25.01250-1 | [@thalesxvt](https://github.com/thalesxvt) |
 | Mateo Vuolo Cortez | 24.00775-7 | [@omateocortez](https://github.com/omateocortez) |
 | Guilherme Tomaz Gomes | 24.00520-7 | [@guit953](https://github.com/guit953) |

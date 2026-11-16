@@ -1,0 +1,38 @@
+$ pytest --cov=app --cov-report=term-missing
+........................................................................ [ 82%]
+...............                                                          [100%]
+
+---------- coverage: platform darwin, python 3.13.9-final-0 ----------
+Name                           Stmts   Miss  Cover   Missing
+------------------------------------------------------------
+app/__init__.py                    0      0   100%
+app/auth.py                       23      0   100%
+app/cli.py                        28     28     0%   7-42
+app/config.py                     12      0   100%
+app/db.py                         19      2    89%   12, 16
+app/ingestao/__init__.py           0      0   100%
+app/ingestao/gravacao.py          98      2    98%   52, 164
+app/ingestao/servico.py           58      4    93%   39, 41, 91, 111
+app/ingestao/smartreport.py      268     21    92%   149, 171, 178-179, 190, 216, 219-220, 228-229, 235, 254, 268, 297, 315, 330, 345, 363, 386, 435, 437
+app/ingestao/validacao.py         30      0   100%
+app/main.py                       29      2    93%   23-24
+app/repositories/__init__.py       0      0   100%
+app/repositories/operacao.py      91      5    95%   19, 97, 132, 142, 154
+app/repositories/usuarios.py      89     10    89%   52-53, 62, 67, 91, 106, 109-110, 124-125
+app/routers/__init__.py            0      0   100%
+app/routers/alertas.py            13      0   100%
+app/routers/importacoes.py        23      2    91%   24-25
+app/routers/indicadores.py        45      4    91%   35-36, 75-76
+app/routers/usuarios.py           74      2    97%   101-102
+app/schemas.py                   157      0   100%
+app/seguranca.py                  45      4    91%   28-29, 64-65
+app/services/__init__.py           0      0   100%
+app/services/alertas.py          117      2    98%   87, 111
+app/services/financeiro.py        23      0   100%
+app/services/indicadores.py       52      0   100%
+app/services/periodo.py           16      0   100%
+app/usuarios_cli.py               24      4    83%   26-28, 37
+------------------------------------------------------------
+TOTAL                           1334     92    93%
+
+87 passed in 3.40s
