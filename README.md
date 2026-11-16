@@ -6,16 +6,22 @@ Tecnologia, 2º semestre de 2026.
 
 A SEMOB recebe da Smart Data relatórios em HTML com a operação dos ônibus. O DashMOB importa
 esses relatórios e mostra quilometragem, viagens programadas e realizadas, cumprimento de
-viagens, passageiros (pagantes e gratuidades) e ocorrências, por dia, semana ou mês e por linha.
+viagens, passageiros (pagantes e gratuidades), bilhetagem e ocorrências, por dia, semana ou mês
+e por linha, com alertas para os dias fora do padrão.
+
+É um app só, em Flutter, que roda no navegador, como aplicativo de computador e como aplicativo
+de celular (Android e iPhone). O passo a passo completo, com os problemas mais comuns, está em
+[`docs/como-rodar.pdf`](docs/como-rodar.pdf).
 
 ## Estrutura
 
 ```
 backend/    API em Python (FastAPI) com MongoDB
 frontend/   app em Flutter (web, desktop e mobile)
+atalhos/    atalhos de dois cliques para Mac e Windows (testes, API, app)
 dados/      relatórios da SEMOB (semob/) e um pacote fictício para os testes (exemplo/)
 scripts/    scripts de apoio (setup, geração do pacote de exemplo)
-docs/       evidências de testes
+docs/       guia de como rodar e evidências de testes
 ```
 
 O app só conversa com a API, e só a API acessa o banco.
@@ -46,11 +52,23 @@ e o app de uma vez. O mesmo código roda de vários jeitos:
 | `abrir no simulador de iPhone` (só Mac) | aplicativo de iPhone, no Simulador do Xcode | Xcode; não precisa de cabo nem de conta da Apple |
 
 No aplicativo instalado o endereço da API vai gravado na hora de montar, apontando para o computador
-que rodou o atalho. O `flutter doctor` mostra o que falta instalar para cada plataforma.
+que rodou o atalho. Por isso ele só carrega com esse computador ligado, a janela do atalho aberta e os
+dois na mesma rede Wi-Fi; mudou de rede, é só rodar o atalho de novo. Depois de instalado, o cabo pode
+ser tirado. O `flutter doctor` mostra o que falta instalar para cada plataforma.
+
+Para instalar em iPhone, na primeira vez: ligar o Modo de Desenvolvedor no aparelho (Ajustes >
+Privacidade e Segurança) e escolher a sua conta Apple em `frontend/ios/Runner.xcworkspace` (Runner >
+Signing & Capabilities > Team). Essa alteração do Xcode fica só na sua máquina, não entra em commit.
+Com conta gratuita o app vale por 7 dias e depois é só instalar de novo.
+
+No Mac, os atalhos que montam aplicativo copiam o `frontend` para `~/Library/Caches/dashmob` antes de
+compilar. É de propósito: quando o projeto fica numa pasta sincronizada com o iCloud (Documentos, Mesa),
+a assinatura da Apple falha com "resource fork, Finder information, or similar detritus not allowed".
 
 Na primeira vez, o `2 - subir API` cria o `backend/.env` e abre ele para colar a `MONGODB_URL`
-do Atlas, que a gente passa no privado. Precisa ter Python 3.12 e Flutter instalados. No Mac, se
-aparecer aviso de desenvolvedor não identificado, clique com o botão direito no atalho e em Abrir.
+do Atlas, que a gente passa no privado. Precisa ter Python 3.12 e Flutter 3.47.5 instalados (é a
+versão que o grupo usa e a que roda nos testes automáticos do GitHub). No Mac, se aparecer aviso de
+desenvolvedor não identificado, clique com o botão direito no atalho e em Abrir.
 
 Se preferir o terminal, os passos são estes:
 
@@ -89,6 +107,10 @@ papel de cada um:
 | gestor | o painel completo e a importação de relatórios |
 | executivo | a Visão executiva (tela inicial) e as telas de indicadores; não importa relatórios, não vê o detalhe por linha e não cadastra ninguém |
 
+No primeiro acesso, cada usuário lê e aceita o termo de uso e aviso de privacidade (veja
+[Privacidade e LGPD](#privacidade-e-lgpd)). Depois, clicando no próprio nome no rodapé do menu, abre o
+"Meu perfil", onde troca o nome, a foto e a senha; papel e e-mail continuam com o administrador.
+
 Como o banco do Atlas é um só pra todo o grupo, o administrador criado por uma pessoa vale pra
 todas. Com o token em mãos (resposta do `POST /login`), o botão Authorize do `/docs` libera as
 outras rotas. O segredo que assina os tokens e a validade da sessão ficam no `.env`
@@ -112,10 +134,18 @@ flutter run -d chrome --dart-define=API_URL=http://localhost:8000
 
 ## Telas
 
-O app segue o protótipo do Figma: menu lateral (recolhido, abre ao passar o mouse), barra de filtros
-(intervalo e linha, que valem para todas as telas) e as telas abaixo. A visão diária, semanal ou mensal
-fica em cima dos gráficos de cada tela, porque só eles mudam com ela. Tem modo escuro, no botão de lua
-do rodapé do menu (a escolha fica guardada no aparelho).
+O app partiu do protótipo do Figma: menu lateral, barra de filtros (intervalo e linha, que valem para
+todas as telas) e as telas abaixo. A visão diária, semanal ou mensal fica em cima dos gráficos de cada
+tela, porque só eles mudam com ela.
+
+No computador o menu fica recolhido, só com os ícones, e abre ao passar o mouse, por cima do conteúdo;
+o alfinete ao lado de "Operação" trava ele aberto. No celular o menu vira gaveta. Tem modo escuro, no
+botão do rodapé do menu. As duas escolhas ficam guardadas no aparelho.
+
+A identidade visual usa as cores do brasão de São Caetano do Sul em detalhes (o filete embaixo da barra
+e a marca do item aberto no menu mudam conforme a tela), a fonte TeX Gyre Heros, uma versão livre da
+Helvetica (`frontend/assets/fontes`, com a licença), e o logotipo "DASH | MOB". A foto de fundo do
+login é do Palácio da Cerâmica, do site da Prefeitura.
 
 | Tela | O que mostra |
 |------|--------------|
@@ -129,7 +159,12 @@ do rodapé do menu (a escolha fica guardada no aparelho).
 | Alertas | dias fora do padrão: cumprimento abaixo de 95%/90% (RN09), desvio acima de 20%/35% do mesmo dia da semana nas últimas 8 semanas (RN10) e excesso de ocorrências (RN11); a Visão Geral mostra uma faixa com o total |
 | Visão executiva | resumo para o secretário apresentar: seis destaques com a variação, comparativo com o período anterior e os alertas críticos; é a tela inicial do papel executivo |
 | Relatórios | exporta o painel do período em PDF, com as seções escolhidas (indicadores, cumprimento, financeiro, alertas e linhas) |
-| Usuários | cadastro, papel e desativação de usuários (só o administrador) |
+| Usuários | cadastro, papel e desativação de usuários, com a foto de cada um (só o administrador) |
+| Sobre o DashMOB | o que é o painel, como cada indicador é calculado, quando um alerta aparece, o que cada perfil acessa, privacidade e quem desenvolveu; abre pelo rodapé do menu, para todos os perfis |
+
+Fora da lista do menu ficam o login, a tela do termo de uso (no primeiro acesso) e o "Meu perfil".
+As telas não mostram os códigos das regras (RN) nem das histórias (US): as explicações para quem usa
+estão na tela Sobre, e os códigos ficam só no código, nos testes e na documentação.
 
 ## Relatórios importados
 
@@ -149,6 +184,19 @@ Cada arquivo é reconhecido pelo título do relatório.
 
 Os passageiros vêm da bilhetagem do sistema todo, então não existem por linha. O código do
 motorista que aparece nos relatórios de ocorrência não é gravado no banco.
+
+## Privacidade e LGPD
+
+Do usuário o painel guarda nome, e-mail, perfil, situação da conta, o hash da senha, a data do aceite
+do termo e, se a pessoa quiser, uma foto de perfil. A foto é reduzida no próprio app para 160 px e fica
+dentro do cadastro do usuário, no MongoDB. Os indicadores são totais por dia e por linha: não
+identificam passageiros, e o código do motorista dos relatórios de ocorrência não é gravado.
+
+O texto do termo de uso e aviso de privacidade está em
+`frontend/lib/features/legal/termo_texto.dart` e a versão em vigor em `TERMO_VERSAO`
+(`backend/app/repositories/usuarios.py`). Mudou o texto, muda a versão nos dois lugares: no acesso
+seguinte todo mundo é convidado a ler e aceitar de novo. O termo é um rascunho do grupo e precisa ser
+validado pela SEMOB antes de uso real.
 
 ## Rotas principais
 
@@ -180,6 +228,10 @@ cd frontend && flutter test --coverage
 
 O nome de cada teste começa com a história ou a regra que ele cobre (`test_us01_...`,
 `test_rn04_...`). Os cenários em Gherkin das histórias estão em `frontend/test/features/`.
+
+Os mesmos testes rodam no GitHub a cada push em `develop` e `main` (`.github/workflows/ci.yml`),
+junto com o `flutter analyze`, que reprova com qualquer aviso. A versão do Flutter fica fixa no
+arquivo do CI: ao atualizar o Flutter do grupo, atualize lá também.
 
 ## Fluxo de trabalho
 
