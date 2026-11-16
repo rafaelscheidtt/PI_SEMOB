@@ -1,0 +1,3 @@
+# Os relatórios HTML do Smart Report (pasta dados/) são dados de entrada, não código:
+# ficam fora da contagem de linguagens do GitHub, que mostrava o projeto como 99% HTML.
+dados/** linguist-vendored

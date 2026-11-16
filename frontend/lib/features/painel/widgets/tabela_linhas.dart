@@ -12,9 +12,9 @@ class TabelaLinhas extends StatelessWidget {
   final List<ResumoLinha> linhas;
   final ValueChanged<ResumoLinha>? onSelecionar;
 
-  static const _cabecalho = TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 0.8, color: Cores.texto2);
-  static const _celula = TextStyle(fontSize: 13, color: Cores.tinta);
-  static const _total = TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Cores.tinta);
+  static TextStyle get _cabecalho => TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 0.8, color: Cores.texto2);
+  static TextStyle get _celula => TextStyle(fontSize: 13, color: Cores.tinta);
+  static TextStyle get _total => TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Cores.tinta);
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +65,7 @@ class TabelaLinhas extends StatelessWidget {
               ],
             ),
           DataRow(
-            color: const WidgetStatePropertyAll(Cores.fundo),
+            color: WidgetStatePropertyAll(Cores.fundo),
             cells: [
               DataCell(Text('Total · ${linhas.length} linhas', style: _total)),
               numero(fmtDecimal(kmSistema), total: true),

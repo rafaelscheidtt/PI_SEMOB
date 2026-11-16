@@ -18,7 +18,7 @@ def _dt(d) -> datetime | None:
     return datetime(d.year, d.month, d.day) if d else None
 
 
-def importar(db: Database, conteudo: bytes, nome_arquivo: str, fonte: str = "smart_report") -> dict:
+def importar(db: Database, conteudo: bytes, nome_arquivo: str, fonte: str = "smart_report", usuario: str | None = None) -> dict:
     """Importa um relatório HTML. Arquivo não reconhecido gera importação com status 'falha'."""
     agora = datetime.now(timezone.utc)
     try:
@@ -27,7 +27,8 @@ def importar(db: Database, conteudo: bytes, nome_arquivo: str, fonte: str = "sma
     except ValueError as exc:
         db.importacoes.insert_one({"arquivo_origem": nome_arquivo, "fonte": fonte, "tipo_relatorio": None,
                                    "status": "falha", "erros": [{"numero": 0, "motivo": str(exc)}],
-                                   "total_registros": 0, "importados": 0, "rejeitados": 0, "importado_em": agora})
+                                   "total_registros": 0, "importados": 0, "rejeitados": 0, "importado_em": agora,
+                                   "usuario": usuario})
         return {"arquivo": nome_arquivo, "tipo_relatorio": None, "status": "falha", "total_registros": 0,
                 "importados": 0, "rejeitados": 0, "inseridos": 0, "atualizados": 0,
                 "erros": [{"numero": 0, "motivo": str(exc)}]}
@@ -59,6 +60,7 @@ def importar(db: Database, conteudo: bytes, nome_arquivo: str, fonte: str = "sma
         "erros": [e.model_dump() for e in rejeitados],
         "status": status,
         "importado_em": agora,
+        "usuario": usuario,  # e-mail de quem importou pelo app (None na linha de comando)
     }
     importacao_id = db.importacoes.insert_one(registro).inserted_id
     contagem = gravar_registros(db, relatorio.tipo, aceitos, importacao_id)
@@ -92,15 +94,15 @@ def expandir_zip(conteudo: bytes) -> list[tuple[str, bytes]]:
     return sorted(arquivos)
 
 
-def importar_pacote(db: Database, arquivos: list[tuple[str, bytes]]) -> dict:
+def importar_pacote(db: Database, arquivos: list[tuple[str, bytes]], usuario: str | None = None) -> dict:
     """Importa vários arquivos (HTML ou .zip) e consolida o resultado."""
     resultados = []
     for nome, conteudo in arquivos:
         if nome.lower().endswith(".zip"):
             for nome_interno, conteudo_interno in expandir_zip(conteudo):
-                resultados.append(importar(db, conteudo_interno, f"{nome}/{nome_interno}"))
+                resultados.append(importar(db, conteudo_interno, f"{nome}/{nome_interno}", usuario=usuario))
         else:
-            resultados.append(importar(db, conteudo, nome))
+            resultados.append(importar(db, conteudo, nome, usuario=usuario))
 
     status = "concluida"
     if resultados and all(r["status"] == "falha" for r in resultados):

@@ -1,6 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- O app conversa com a API pela rede. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- usesCleartextTraffic: a API de desenvolvimento roda em http:// na rede local.
+         Quando a API estiver publicada em https, esta linha pode sair. -->
     <application
-        android:label="dashmob"
+        android:label="DashMOB"
+        android:usesCleartextTraffic="true"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -28,3 +28,4 @@ def criar_indices(db: Database) -> None:
     db.ocorrencias_viagem.create_index([("data", ASCENDING), ("linha_id", ASCENDING)])
     db.viagens.create_index([("data", ASCENDING), ("linha_id", ASCENDING), ("prefixo", ASCENDING), ("inicio_realizado", ASCENDING)], unique=True)
     db.importacoes.create_index([("importado_em", ASCENDING)])
+    db.usuarios.create_index([("email", ASCENDING)], unique=True)

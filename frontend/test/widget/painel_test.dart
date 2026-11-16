@@ -113,14 +113,14 @@ void main() {
     expect(find.text('Linha 02 — Circular Gerty'), findsOneWidget);
   });
 
-  testWidgets('menu não abre as telas previstas para a Sprint 2', (tester) async {
+  testWidgets('Sprint 2 entregue: nenhuma tela do menu fica marcada como Sprint 2', (tester) async {
     janela(tester, 1400);
     await tester.pumpWidget(app(RepositorioFalso(comDados)));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('menu-financeiro')));
+    expect(find.text('Sprint 2'), findsNothing);
+    await tester.tap(find.byKey(const Key('menu-relatorios')));
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('tela-visaoGeral')), findsOneWidget);
-    expect(find.text('Sprint 2'), findsNWidgets(3));
+    expect(find.byKey(const ValueKey('tela-relatorios')), findsOneWidget);
   });
 
   testWidgets('US06 tela expandida tem o menu fixo e quatro colunas de cartões', (tester) async {

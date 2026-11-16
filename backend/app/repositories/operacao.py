@@ -171,3 +171,33 @@ def listar_ocorrencias(db: Database, inicio: date, fim: date, linha_codigo: str 
 def listar_linhas(db: Database) -> list[dict]:
     return [{"codigo": l["codigo"], "nome": l.get("nome", l["codigo"]), "atendimentos": l.get("atendimentos", [])}
             for l in db.linhas.find({"ativa": True}).sort("codigo")]
+
+
+def agregar_financeiro(db: Database, inicio: date, fim: date, granularidade: str) -> list[dict]:
+    """Série financeira do sistema (US07) a partir de `operacao_diaria.financeiro`.
+
+    Vendas, utilização, crédito circulante e créditos transferidos são somados no período;
+    o saldo final é o do último dia do período que tem o relatório de saldos.
+    """
+    _validar(granularidade)
+    pipeline = [
+        {"$match": {**_filtro_datas(inicio, fim), "financeiro": {"$exists": True}}},
+        {"$sort": {"data": 1}},
+        {"$group": {
+            "_id": f"$periodo_{granularidade}",
+            "vendas": {"$sum": "$financeiro.vendas"},
+            "utilizacao": {"$sum": "$financeiro.utilizacao"},
+            "credito_circulante": {"$sum": "$financeiro.credito_circulante"},
+            "creditos_transferidos": {"$sum": "$financeiro.creditos_transferidos"},
+            "saldo_final": {"$last": "$financeiro.saldo_final"},
+            "dias_com_dados": {"$sum": 1},
+        }},
+        {"$sort": {"_id": 1}},
+    ]
+    return [{"periodo": d["_id"], **{k: v for k, v in d.items() if k != "_id"}} for d in db.operacao_diaria.aggregate(pipeline)]
+
+
+def primeiro_dia_com_financeiro(db: Database) -> date | None:
+    """Quando começou a bilhetagem (RN: antes do Tarifa Zero acabar não existe dado financeiro)."""
+    doc = db.operacao_diaria.find_one({"financeiro": {"$exists": True}}, sort=[("data", 1)])
+    return doc["data"].date() if doc else None

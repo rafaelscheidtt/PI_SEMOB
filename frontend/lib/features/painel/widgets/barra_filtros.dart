@@ -6,7 +6,9 @@ import '../../../core/periodo.dart';
 import '../../../core/tema.dart';
 import '../../../data/models.dart';
 
-/// Barra superior com o título e os filtros compartilhados: intervalo, granularidade e linha (US05).
+/// Barra superior com o nome da tela e os filtros que valem para a tela inteira: intervalo e linha (US05).
+/// Um filete na cor da tela acompanha a base da barra.
+/// A granularidade (dia, semana, mês) só muda os gráficos, por isso fica junto deles ([SeletorGranularidade]).
 class BarraFiltros extends StatelessWidget {
   const BarraFiltros({
     super.key,
@@ -15,6 +17,8 @@ class BarraFiltros extends StatelessWidget {
     required this.compacto,
     required this.onFiltros,
     this.titulo = 'Gestão Operacional de Transporte Público',
+    this.grupo,
+    this.cor,
   });
 
   final FiltrosPainel filtros;
@@ -22,6 +26,12 @@ class BarraFiltros extends StatelessWidget {
   final bool compacto;
   final ValueChanged<FiltrosPainel> onFiltros;
   final String titulo;
+
+  /// Grupo do menu, escrito em cinza antes do título ("Operação / Visão Geral").
+  final String? grupo;
+
+  /// Cor do filete embaixo da barra (a da tela aberta); sem ela, só a linha cinza.
+  final Color? cor;
 
   Future<void> _escolherIntervalo(BuildContext context) async {
     final r = await showDateRangePicker(
@@ -41,69 +51,141 @@ class BarraFiltros extends StatelessWidget {
       onPressed: () => _escolherIntervalo(context),
       style: OutlinedButton.styleFrom(
         foregroundColor: Cores.tinta,
-        side: const BorderSide(color: Cores.linha),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+        side: BorderSide(color: Cores.linha),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         textStyle: const TextStyle(fontSize: 13),
       ),
       icon: const Icon(Icons.calendar_today_outlined, size: 15),
       label: Text('${fmtData(filtros.inicio)} – ${fmtData(filtros.fim)}'),
     );
-    final seletorGranularidade = SegmentedButton<Granularidade>(
-      segments: [for (final g in Granularidade.values) ButtonSegment(value: g, label: Text(g.rotulo))],
-      selected: {filtros.granularidade},
-      onSelectionChanged: (s) => onFiltros(filtros.copyWith(granularidade: s.first)),
-      showSelectedIcon: false,
-      style: SegmentedButton.styleFrom(
-        selectedBackgroundColor: Cores.navy,
-        selectedForegroundColor: Colors.white,
-        foregroundColor: Cores.texto2,
-        side: const BorderSide(color: Cores.linha),
-        textStyle: const TextStyle(fontSize: 13),
-        visualDensity: VisualDensity.compact,
-      ),
-    );
     final seletorLinha = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(border: Border.all(color: Cores.linha), borderRadius: BorderRadius.circular(7)),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      decoration: BoxDecoration(border: Border.all(color: Cores.linha), borderRadius: BorderRadius.circular(6)),
       child: DropdownButton<String?>(
         key: const Key('seletor-linha'),
         value: filtros.linha,
         underline: const SizedBox.shrink(),
         isDense: true,
-        style: const TextStyle(fontSize: 13, color: Cores.tinta),
+        style: TextStyle(fontSize: 13, color: Cores.tinta),
         items: [
           DropdownMenuItem<String?>(value: null, child: Text('Todas as linhas${linhas.isEmpty ? '' : ' (${linhas.length})'}')),
           for (final l in linhas) DropdownMenuItem<String?>(value: l.codigo, child: Text('${l.codigo} — ${l.nome}')),
+          // linha escolhida antes de a lista chegar da API (ou fora dela): continua selecionável
+          if (filtros.linha != null && !linhas.any((l) => l.codigo == filtros.linha))
+            DropdownMenuItem<String?>(value: filtros.linha, child: Text('Linha ${filtros.linha}')),
         ],
         onChanged: (v) => onFiltros(filtros.copyWith(linha: v, limparLinha: v == null)),
       ),
     );
 
-    final controles = [botaoIntervalo, seletorGranularidade, seletorLinha];
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: compacto ? 14 : 28, vertical: 12),
-      decoration: const BoxDecoration(color: Colors.white, border: Border(bottom: BorderSide(color: Cores.linha))),
+    final controles = [botaoIntervalo, seletorLinha];
+    final barra = Container(
+      padding: EdgeInsets.symmetric(horizontal: compacto ? 14 : 28, vertical: compacto ? 10 : 12),
+      color: Cores.superficie,
       child: compacto
           ? Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              for (final c in controles) Padding(padding: const EdgeInsets.only(bottom: 8), child: c),
+              botaoIntervalo,
+              const SizedBox(height: 8),
+              seletorLinha,
             ])
           : Row(children: [
-              Flexible(
-                child: Text(titulo, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+              // o título ocupa só o que precisa; os filtros ficam encostados na direita
+              Expanded(
+                child: Text.rich(
+                  TextSpan(children: [
+                    if (grupo != null) TextSpan(text: '$grupo  /  ', style: TextStyle(color: Cores.texto2, fontWeight: FontWeight.w400)),
+                    TextSpan(text: titulo),
+                  ]),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Cores.tinta),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 flex: 2,
-                child: Wrap(
-                  alignment: WrapAlignment.end,
-                  spacing: 10,
-                  runSpacing: 8,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: controles,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Wrap(
+                    alignment: WrapAlignment.end,
+                    spacing: 10,
+                    runSpacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: controles,
+                  ),
                 ),
               ),
             ]),
     );
+    return Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      barra,
+      FileteDaTela(cor: cor),
+    ]);
+  }
+}
+
+/// Filete fino na cor da tela aberta; troca de cor suavemente quando o usuário muda de tela.
+class FileteDaTela extends StatelessWidget implements PreferredSizeWidget {
+  const FileteDaTela({super.key, required this.cor});
+
+  final Color? cor;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(2);
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(duration: const Duration(milliseconds: 250), curve: Curves.easeOut, height: cor == null ? 1 : 2, color: cor ?? Cores.linha);
+  }
+}
+
+/// Seletor de granularidade dos gráficos (RN01): diária, semanal ou mensal.
+/// Fica em cima dos gráficos, porque os cartões de indicador mostram o total do período e não mudam com ele.
+class SeletorGranularidade extends StatelessWidget {
+  const SeletorGranularidade({super.key, required this.granularidade, required this.onChanged});
+
+  final Granularidade granularidade;
+  final ValueChanged<Granularidade> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SegmentedButton<Granularidade>(
+      key: const Key('seletor-granularidade'),
+      segments: [for (final g in Granularidade.values) ButtonSegment(value: g, label: Text(g.rotulo))],
+      selected: {granularidade},
+      onSelectionChanged: (s) => onChanged(s.first),
+      showSelectedIcon: false,
+      style: SegmentedButton.styleFrom(
+        selectedBackgroundColor: Cores.destaque,
+        selectedForegroundColor: Cores.sobreDestaque,
+        foregroundColor: Cores.texto2,
+        side: BorderSide(color: Cores.linha),
+        textStyle: const TextStyle(fontSize: 13),
+        visualDensity: VisualDensity.compact,
+      ),
+    );
+  }
+}
+
+/// Linha "Gráficos por período" com o [SeletorGranularidade], colocada logo acima dos gráficos de cada tela.
+class CabecalhoGraficos extends StatelessWidget {
+  const CabecalhoGraficos({super.key, required this.granularidade, required this.onChanged, this.texto = 'Gráficos por período'});
+
+  final Granularidade granularidade;
+  final ValueChanged<Granularidade>? onChanged;
+  final String texto;
+
+  @override
+  Widget build(BuildContext context) {
+    final seletor = onChanged == null ? null : SeletorGranularidade(granularidade: granularidade, onChanged: onChanged!);
+    return LayoutBuilder(builder: (context, c) {
+      final titulo = Text(texto, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Cores.tinta));
+      if (seletor == null) return titulo;
+      if (c.maxWidth < 480) {
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [titulo, const SizedBox(height: 8), seletor]);
+      }
+      return Row(children: [Expanded(child: titulo), seletor]);
+    });
   }
 }

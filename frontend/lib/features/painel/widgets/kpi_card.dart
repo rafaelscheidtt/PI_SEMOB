@@ -18,7 +18,7 @@ class KpiCard extends StatelessWidget {
     this.rotuloVariacao = 'vs. anterior',
     this.etiqueta,
     this.serie = const [],
-    this.cor = Cores.navy,
+    this.cor,
   });
 
   final String titulo;
@@ -37,7 +37,9 @@ class KpiCard extends StatelessWidget {
   /// Etiqueta personalizada, no lugar da variação (ex.: "72,5% do total").
   final Widget? etiqueta;
   final List<double> serie;
-  final Color cor;
+
+  /// Cor da tendência; sem ela, a cor de destaque da paleta.
+  final Color? cor;
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +71,7 @@ class KpiCard extends StatelessWidget {
                   child: Text(
                     valor!,
                     key: Key('kpi-$titulo'),
-                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, letterSpacing: -0.5, color: Cores.tinta, height: 1.1),
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, letterSpacing: -0.5, color: Cores.tinta, height: 1.1),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -77,7 +79,7 @@ class KpiCard extends StatelessWidget {
                 if (unidade != null)
                   Padding(
                     padding: const EdgeInsets.only(left: 4),
-                    child: Text(unidade!, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Cores.texto2)),
+                    child: Text(unidade!, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Cores.texto2)),
                   ),
               ],
             ),
@@ -89,7 +91,7 @@ class KpiCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 6),
-          Sparkline(valores: valor == null ? const [] : serie, cor: cor),
+          Sparkline(valores: valor == null ? const [] : serie, cor: cor ?? Cores.destaque),
         ],
       ),
     );

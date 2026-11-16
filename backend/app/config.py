@@ -10,5 +10,13 @@ class Settings(BaseSettings):
     mongodb_db: str = "dashmob"
     cors_origins: str = "*"
 
+    # login (US11): segredo que assina os tokens e validade da sessão em horas
+    token_secret: str = "troque-este-segredo-no-.env"
+    token_horas: int = 8
+    # primeiro administrador: criado ao subir a API se a coleção `usuarios` estiver vazia
+    admin_inicial_nome: str = "Administrador"
+    admin_inicial_email: str = ""
+    admin_inicial_senha: str = ""
+
 
 settings = Settings()

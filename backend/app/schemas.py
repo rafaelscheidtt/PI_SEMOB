@@ -50,6 +50,66 @@ class RespostaIndicadores(BaseModel):
     anterior: PeriodoAnterior | None = None
 
 
+class PontoFinanceiro(BaseModel):
+    periodo: str
+    vendas: float
+    utilizacao: float
+    credito_circulante: float
+    creditos_transferidos: float
+    saldo_final: float | None
+    dias_com_dados: int
+
+
+class TotaisFinanceiro(BaseModel):
+    vendas: float
+    utilizacao: float
+    credito_circulante: float
+    creditos_transferidos: float
+    saldo_final: float | None
+    vendas_por_dia: float | None
+    utilizacao_por_dia: float | None
+    dias_com_dados: int
+
+
+class FinanceiroAnterior(BaseModel):
+    inicio: date
+    fim: date
+    totais: TotaisFinanceiro
+
+
+class RespostaFinanceiro(BaseModel):
+    granularidade: str
+    inicio: date
+    fim: date
+    sem_dados: bool
+    serie: list[PontoFinanceiro]
+    totais: TotaisFinanceiro | None
+    anterior: FinanceiroAnterior | None = None
+    inicio_bilhetagem: date | None = None
+
+
+class Alerta(BaseModel):
+    data: date
+    tipo: str  # cumprimento | historico | ocorrencias
+    indicador: str  # fcv | km_total | viagens_realizadas | passageiros_total | ocorrencias
+    severidade: str  # aviso | critico
+    valor: float
+    esperado: float | None
+    desvio: float | None
+    mensagem: str
+    linha: str | None
+
+
+class RespostaAlertas(BaseModel):
+    inicio: date
+    fim: date
+    linha: str | None
+    total: int
+    criticos: int
+    avisos: int
+    alertas: list[Alerta]
+
+
 class Turno(BaseModel):
     turno: str
     programadas: int

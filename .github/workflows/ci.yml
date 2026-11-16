@@ -37,6 +37,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
+          # versão fixa, a mesma que o grupo usa: sem isso o CI pega o Flutter mais novo a cada execução
+          # e passa a falhar por avisos de depreciação que não existem na nossa versão
+          flutter-version: 3.47.5
           channel: stable
           cache: true
       - run: flutter pub get

@@ -1,17 +1,28 @@
 // apoio dos testes de widget: repositório falso, dados de exemplo e a montagem do app
 import 'package:dashmob/core/filtros.dart';
 import 'package:dashmob/core/periodo.dart';
+import 'package:dashmob/core/sessao.dart';
+import 'package:dashmob/core/tema.dart';
+import 'package:dashmob/core/tema_controle.dart';
+import 'package:dashmob/data/auth_repository.dart';
 import 'package:dashmob/data/indicadores_repository.dart';
 import 'package:dashmob/data/models.dart';
 import 'package:dashmob/features/painel/painel_shell.dart';
 import 'package:dashmob/features/painel/telas.dart';
+import 'package:dashmob/features/perfil/foto.dart';
+import 'package:dashmob/features/relatorios/relatorios_page.dart';
+import 'package:dashmob/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class RepositorioFalso implements IndicadoresRepository {
-  RepositorioFalso(this.resposta, {this.historico = const [], this.resultadoImportacao});
+  RepositorioFalso(this.resposta, {this.historico = const [], this.resultadoImportacao, Financeiro? respostaFinanceira, Alertas? respostaAlertas})
+      : respostaFinanceira = respostaFinanceira ?? comFinanceiro,
+        respostaAlertas = respostaAlertas ?? comAlertas;
   final Indicadores resposta;
+  final Financeiro respostaFinanceira;
+  final Alertas respostaAlertas;
   final List<Importacao> historico;
   final ResultadoImportacao? resultadoImportacao;
   List<ArquivoEnvio>? arquivosEnviados;
@@ -19,6 +30,8 @@ class RepositorioFalso implements IndicadoresRepository {
   String? ultimaLinha;
   bool? ultimoComparar;
   int consultas = 0;
+  int consultasFinanceiro = 0;
+  String? ultimaLinhaAlertas;
 
   @override
   Future<Indicadores> obter({required DateTime inicio, required DateTime fim, required Granularidade granularidade, String? linha, bool comparar = false}) async {
@@ -54,6 +67,18 @@ class RepositorioFalso implements IndicadoresRepository {
       );
 
   @override
+  Future<Financeiro> financeiro({required DateTime inicio, required DateTime fim, required Granularidade granularidade, bool comparar = false}) async {
+    consultasFinanceiro++;
+    return respostaFinanceira;
+  }
+
+  @override
+  Future<Alertas> alertas({required DateTime inicio, required DateTime fim, String? linha}) async {
+    ultimaLinhaAlertas = linha;
+    return respostaAlertas;
+  }
+
+  @override
   Future<List<Importacao>> importacoes() async => historico;
 
   @override
@@ -64,6 +89,114 @@ class RepositorioFalso implements IndicadoresRepository {
     return r;
   }
 }
+
+/// Usuários de teste, um por papel (US11).
+const admin = Usuario(id: 'u1', nome: 'Ana Admin', email: 'admin@semob.teste', papel: Papel.administrador);
+const gestor = Usuario(id: 'u2', nome: 'Gil Gestor', email: 'gestor@semob.teste', papel: Papel.gestor);
+const executivo = Usuario(id: 'u3', nome: 'Eva Executiva', email: 'exec@semob.teste', papel: Papel.executivo);
+
+/// Login e cadastro falsos: aceita a senha "senha123" de qualquer usuário da lista.
+class AuthFalso implements AuthRepository {
+  AuthFalso({List<Usuario> usuarios = const [admin, gestor, executivo], this.sessaoGuardada}) : lista = List.of(usuarios);
+  final List<Usuario> lista;
+  Usuario? sessaoGuardada;
+  int logins = 0;
+
+  /// Quem entrou por último (o "Meu perfil" mexe nele); sem login, o primeiro da lista.
+  Usuario? logado;
+
+  @override
+  Future<Sessao> login(String email, String senha) async {
+    logins++;
+    final u = lista.where((u) => u.email == email.trim() && u.ativo).toList();
+    if (u.isEmpty || senha != 'senha123') throw ErroApi('E-mail ou senha incorretos');
+    logado = u.first;
+    return Sessao(token: 'token-${u.first.id}', usuario: u.first);
+  }
+
+  @override
+  Future<Usuario> quemSou() async {
+    final u = sessaoGuardada;
+    if (u == null) throw ErroApi('Sessão inválida ou expirada, faça login de novo');
+    return u;
+  }
+
+  @override
+  Future<List<Usuario>> usuarios() async => List.of(lista);
+
+  @override
+  Future<Usuario> criarUsuario({required String nome, required String email, required String senha, required Papel papel}) async {
+    if (lista.any((u) => u.email == email)) throw ErroApi('já existe um usuário com este e-mail');
+    final novo = Usuario(id: 'u${lista.length + 1}', nome: nome, email: email, papel: papel);
+    lista.add(novo);
+    return novo;
+  }
+
+  @override
+  Future<Usuario> editarUsuario(String id, {String? nome, Papel? papel, bool? ativo, String? senha}) async {
+    final i = lista.indexWhere((u) => u.id == id);
+    final atual = lista[i];
+    final novo = Usuario(id: id, nome: nome ?? atual.nome, email: atual.email, papel: papel ?? atual.papel, ativo: ativo ?? atual.ativo);
+    lista[i] = novo;
+    return novo;
+  }
+
+  @override
+  Future<Usuario> atualizarPerfil({String? nome, String? senhaAtual, String? novaSenha, String? foto}) async {
+    final atual = logado ?? sessaoGuardada ?? lista.first;
+    if (novaSenha != null && senhaAtual != 'senha123') throw ErroApi('A senha atual não confere');
+    perfilSalvo = (nome: nome, novaSenha: novaSenha, foto: foto);
+    final novo = Usuario(id: atual.id, nome: nome ?? atual.nome, email: atual.email, papel: atual.papel, ativo: atual.ativo, foto: foto == null ? atual.foto : (foto.isEmpty ? null : foto), termoPendente: atual.termoPendente);
+    final i = lista.indexWhere((u) => u.id == atual.id);
+    if (i >= 0) lista[i] = novo;
+    logado = novo;
+    return novo;
+  }
+
+  @override
+  Future<Usuario> aceitarTermo() async {
+    if (falharNoTermo) throw ErroApi('Não foi possível registrar o aceite');
+    aceites++;
+    final atual = logado ?? sessaoGuardada ?? lista.first;
+    final novo = Usuario(id: atual.id, nome: atual.nome, email: atual.email, papel: atual.papel, ativo: atual.ativo, foto: atual.foto);
+    final i = lista.indexWhere((u) => u.id == atual.id);
+    if (i >= 0) lista[i] = novo;
+    logado = novo;
+    return novo;
+  }
+
+  int aceites = 0;
+  bool falharNoTermo = false;
+
+  /// O que chegou na última chamada de [atualizarPerfil].
+  ({String? nome, String? novaSenha, String? foto})? perfilSalvo;
+}
+
+/// PNG de 1 pixel, como a foto que o seletor devolveria já pronta.
+const fotoDeTeste = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==';
+
+/// Financeiro de exemplo: bilhetagem desde 15/07/2026, duas semanas na série.
+final comFinanceiro = Financeiro(
+  semDados: false,
+  serie: const [
+    PontoFinanceiro(periodo: '2026-W37', vendas: 32448, utilizacao: 34320, creditoCirculante: -1872, creditosTransferidos: 39000, saldoFinal: 961000, diasComDados: 7),
+    PontoFinanceiro(periodo: '2026-W38', vendas: 40000, utilizacao: 30000, creditoCirculante: 10000, creditosTransferidos: 20000, saldoFinal: 971000, diasComDados: 7),
+  ],
+  totais: const TotaisFinanceiro(vendas: 72448, utilizacao: 64320, creditoCirculante: 8128, creditosTransferidos: 59000, saldoFinal: 971000, vendasPorDia: 5174.86, utilizacaoPorDia: 4594.29, diasComDados: 14),
+  anterior: FinanceiroAnterior(
+    inicio: DateTime(2026, 8, 1),
+    fim: DateTime(2026, 8, 31),
+    totais: const TotaisFinanceiro(vendas: 60000, utilizacao: 64320, creditoCirculante: -4320, creditosTransferidos: 50000, saldoFinal: 900000, diasComDados: 31),
+  ),
+  inicioBilhetagem: DateTime(2026, 7, 15),
+);
+
+/// Alertas de exemplo: um crítico e dois avisos em dois dias.
+final comAlertas = Alertas(total: 3, criticos: 1, avisos: 2, alertas: [
+  Alerta(data: DateTime(2026, 9, 8), tipo: 'cumprimento', indicador: 'fcv', severidade: Severidade.critico, valor: 88, esperado: 95, desvio: -12, mensagem: 'Cumprimento de 88,0% (88 de 100 viagens programadas)'),
+  Alerta(data: DateTime(2026, 9, 8), tipo: 'historico', indicador: 'km_total', severidade: Severidade.aviso, valor: 700, esperado: 1000, desvio: -30, mensagem: 'Quilometragem 30% abaixo do normal de uma terça (700 km vs. 1.000 km em média nas últimas 8 semanas)'),
+  Alerta(data: DateTime(2026, 9, 5), tipo: 'ocorrencias', indicador: 'ocorrencias', severidade: Severidade.aviso, valor: 9, esperado: 1.8, desvio: 400, mensagem: '9 viagens com ocorrência no dia, 5,0x a média do período (1,8 por dia)', linha: '02'),
+]);
 
 const comDados = Indicadores(
   semDados: false,
@@ -92,11 +225,40 @@ const porLinha = Indicadores(
 
 final filtrosPadrao = FiltrosPainel(inicio: DateTime(2026, 9, 1), fim: DateTime(2026, 9, 30));
 
-Widget app(IndicadoresRepository repo, {FiltrosPainel? filtros, Tela tela = Tela.visaoGeral}) => MaterialApp(
+const _localizacao = [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate];
+
+/// O painel já logado (por padrão como gestor), sem passar pela tela de login.
+Widget app(IndicadoresRepository repo, {FiltrosPainel? filtros, Tela tela = Tela.visaoGeral, Usuario usuario = gestor, AuthRepository? auth, VoidCallback? onSair, bool menuRetratil = false, ControleTema? tema, SalvarPdf? salvarPdf, EscolherFoto? escolherFoto, ValueChanged<Usuario>? onUsuarioAtualizado}) => MaterialApp(
       locale: const Locale('pt', 'BR'),
       supportedLocales: const [Locale('pt', 'BR')],
-      localizationsDelegates: const [GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate, GlobalCupertinoLocalizations.delegate],
-      home: PainelShell(repository: repo, filtrosIniciais: filtros ?? filtrosPadrao, telaInicial: tela),
+      localizationsDelegates: _localizacao,
+      theme: temaDashMob(),
+      darkTheme: temaDashMobEscuro(),
+      themeMode: tema?.value ?? ThemeMode.light,
+      home: PainelShell(
+        repository: repo,
+        authRepository: auth ?? AuthFalso(),
+        usuario: usuario,
+        onSair: onSair ?? () {},
+        filtrosIniciais: filtros ?? filtrosPadrao,
+        telaInicial: tela,
+        tema: tema,
+        menuRetratil: menuRetratil,
+        intervaloMonitoramento: null,
+        salvarPdf: salvarPdf ?? (bytes, nome) async {},
+        brasaoPdf: () async => null,
+        escolherFoto: escolherFoto ?? () async => null,
+        lembrarMenu: false,
+        onUsuarioAtualizado: onUsuarioAtualizado,
+      ),
+    );
+
+/// O app inteiro, começando pela decisão login/painel (AppRaiz), como em produção.
+Widget appCompleto(IndicadoresRepository repo, AuthFalso auth, {String? tokenGuardado}) => MaterialApp(
+      locale: const Locale('pt', 'BR'),
+      supportedLocales: const [Locale('pt', 'BR')],
+      localizationsDelegates: _localizacao,
+      home: AppRaiz(key: UniqueKey(), sessao: SessaoAtual(), armazenamento: ArmazenamentoMemoria(tokenGuardado), auth: auth, repository: repo, menuRetratil: false),
     );
 
 /// Define a largura da janela de teste (o layout usa LayoutBuilder, então MediaQuery não basta).

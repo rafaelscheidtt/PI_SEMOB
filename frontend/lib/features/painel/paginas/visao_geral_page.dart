@@ -7,6 +7,7 @@ import '../../../core/periodo.dart';
 import '../../../core/tema.dart';
 import '../../../data/indicadores_repository.dart';
 import '../../../data/models.dart';
+import '../widgets/barra_filtros.dart';
 import '../widgets/cartao.dart';
 import '../widgets/estados.dart';
 import '../widgets/grafico_colunas.dart';
@@ -16,13 +17,19 @@ import '../widgets/tabela_linhas.dart';
 /// Visão Geral: os quatro indicadores principais, pagantes × gratuidades, FCV, faixas horárias
 /// e o monitoramento por linha (US02 a US05).
 class VisaoGeralPage extends StatefulWidget {
-  const VisaoGeralPage({super.key, required this.filtros, required this.repository, this.onAbrirLinha});
+  const VisaoGeralPage({super.key, required this.filtros, required this.repository, this.onAbrirLinha, this.onAbrirAlertas, this.onGranularidade});
 
   final FiltrosPainel filtros;
   final IndicadoresRepository repository;
 
+  /// Troca a granularidade dos gráficos (dia, semana, mês); os cartões de total não dependem dela.
+  final ValueChanged<Granularidade>? onGranularidade;
+
   /// Chamado ao clicar em uma linha da tabela de monitoramento.
   final ValueChanged<String>? onAbrirLinha;
+
+  /// Chamado pelo "Ver alertas" da faixa de destaque (US08).
+  final VoidCallback? onAbrirAlertas;
 
   @override
   State<VisaoGeralPage> createState() => _VisaoGeralPageState();
@@ -32,6 +39,7 @@ class _VisaoGeralPageState extends State<VisaoGeralPage> {
   Indicadores? _dados;
   DetalhesOperacao _detalhes = DetalhesOperacao.vazio;
   List<ResumoLinha> _linhas = const [];
+  Alertas? _alertas;
   String? _erro;
   bool _carregando = true;
   String _busca = '';
@@ -61,7 +69,9 @@ class _VisaoGeralPageState extends State<VisaoGeralPage> {
     setState(() {
       _carregando = true;
       _erro = null;
+      _alertas = null;
     });
+    _carregarAlertas(f);
     try {
       final resultados = await Future.wait<Object>([
         widget.repository.obter(inicio: f.inicio, fim: f.fim, granularidade: f.granularidade, linha: f.linha, comparar: true),
@@ -81,12 +91,23 @@ class _VisaoGeralPageState extends State<VisaoGeralPage> {
     }
   }
 
+  /// Os alertas chegam à parte: se a rota falhar, o painel continua normal, só sem a faixa.
+  Future<void> _carregarAlertas(FiltrosPainel f) async {
+    try {
+      final a = await widget.repository.alertas(inicio: f.inicio, fim: f.fim, linha: f.linha);
+      if (mounted && f == widget.filtros) setState(() => _alertas = a);
+    } catch (_) {
+      // sem destaque de alertas
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final f = widget.filtros;
     return LayoutBuilder(builder: (context, c) {
       final faixa = faixaDeLargura(c.maxWidth);
       final d = _dados;
+      final a = _alertas;
       final conteudo = <Widget>[
         CabecalhoTela(
           titulo: f.linha == null ? 'Painel consolidado de desempenho' : 'Linha ${f.linha} no período',
@@ -94,6 +115,10 @@ class _VisaoGeralPageState extends State<VisaoGeralPage> {
           acoes: [if (d != null && !d.semDados) const Etiqueta('● Dados atualizados', tom: TomEtiqueta.ok)],
         ),
         const SizedBox(height: 18),
+        if (a != null && a.total > 0 && !_carregando && _erro == null) ...[
+          FaixaAlertas(alertas: a, onVer: widget.onAbrirAlertas),
+          const SizedBox(height: 18),
+        ],
         if (_erro != null) MensagemErro(_erro!),
         if (_carregando) const Carregando(),
         if (!_carregando && _erro == null && d != null) ..._corpo(faixa, d),
@@ -196,7 +221,7 @@ class _VisaoGeralPageState extends State<VisaoGeralPage> {
           ? const AvisoSemDados(texto: 'Sem o relatório de faixa horária no período')
           : GraficoColunas(
               rotulos: [for (final x in faixas) '${x.faixa.toString().padLeft(2, '0')}h'],
-              series: [SerieColunas(nome: 'Viagens', valores: [for (final x in faixas) x.viagens.toDouble()], cor: Cores.navy)],
+              series: [SerieColunas(nome: 'Viagens', valores: [for (final x in faixas) x.viagens.toDouble()], cor: Cores.destaque)],
               altura: 200,
             ),
     );
@@ -218,6 +243,8 @@ class _VisaoGeralPageState extends State<VisaoGeralPage> {
         children: cartoes,
       ),
       const SizedBox(height: 18),
+      CabecalhoGraficos(granularidade: widget.filtros.granularidade, onChanged: widget.onGranularidade, texto: 'Evolução no período'),
+      const SizedBox(height: 12),
       if (expandido)
         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Expanded(flex: 2, child: graficoPassageiros),
@@ -240,12 +267,12 @@ class _VisaoGeralPageState extends State<VisaoGeralPage> {
             width: 200,
             child: TextField(
               key: const Key('busca-linha'),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 isDense: true,
-                prefixIcon: Icon(Icons.search, size: 18),
+                prefixIcon: const Icon(Icons.search, size: 18),
                 hintText: 'Buscar linha',
                 border: OutlineInputBorder(borderSide: BorderSide(color: Cores.linha)),
-                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               ),
               onChanged: (v) => setState(() => _busca = v),
             ),
@@ -269,7 +296,7 @@ class _VisaoGeralPageState extends State<VisaoGeralPage> {
   }
 
   List<SerieColunas> _seriesPassageiros(Indicadores d) => [
-        SerieColunas(nome: 'Pagantes (catraca + antecipados)', valores: [for (final p in d.serie) (p.pagantes ?? 0).toDouble()], cor: Cores.navy),
+        SerieColunas(nome: 'Pagantes (catraca + antecipados)', valores: [for (final p in d.serie) (p.pagantes ?? 0).toDouble()], cor: Cores.destaque),
         SerieColunas(nome: 'Gratuidades', valores: [for (final p in d.serie) (p.naoPagantes ?? 0).toDouble()], cor: Cores.verde),
       ];
 
@@ -306,12 +333,11 @@ class _CartaoCumprimento extends StatelessWidget {
       subtitulo: 'Realizadas ÷ programadas',
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         if (totais.fcv == null)
-          const Text('Sem dados', key: Key('kpi-FCV'), style: TextStyle(color: Cores.texto2, fontWeight: FontWeight.w600))
+          Text('Sem dados', key: Key('kpi-FCV'), style: TextStyle(color: Cores.texto2, fontWeight: FontWeight.w600))
         else
-          Row(crossAxisAlignment: CrossAxisAlignment.baseline, textBaseline: TextBaseline.alphabetic, children: [
-            Text(fmtPercentual(totais.fcv!), key: const Key('kpi-FCV'), style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w700, color: Cores.verde)),
-            const SizedBox(width: 8),
-            Text('no período', style: Theme.of(context).textTheme.bodySmall),
+          Wrap(crossAxisAlignment: WrapCrossAlignment.end, spacing: 8, children: [
+            Text(fmtPercentual(totais.fcv!), key: const Key('kpi-FCV'), style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w700, color: Cores.verde, height: 1.1)),
+            Padding(padding: const EdgeInsets.only(bottom: 5), child: Text('no período', style: Theme.of(context).textTheme.bodySmall)),
           ]),
         if (turnos.isNotEmpty) ...[
           const SizedBox(height: 12),
@@ -331,7 +357,7 @@ class _CartaoCumprimento extends StatelessWidget {
                 ),
                 Text(
                   p.viagensNaoRealizadas == null ? '' : '${fmtInteiro(p.viagensNaoRealizadas!)} viagens a menos',
-                  style: const TextStyle(fontSize: 11.5, color: Cores.texto2),
+                  style: TextStyle(fontSize: 11.5, color: Cores.texto2),
                 ),
               ]),
             ),
@@ -355,7 +381,7 @@ class _LinhaTurno extends StatelessWidget {
         Row(children: [
           SizedBox(width: 56, child: Text(turno.rotulo, style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600))),
           Expanded(
-            child: Text('${fmtInteiro(turno.realizadas)} / ${fmtInteiro(turno.programadas)}', style: const TextStyle(fontSize: 12, color: Cores.texto2)),
+            child: Text('${fmtInteiro(turno.realizadas)} / ${fmtInteiro(turno.programadas)}', style: TextStyle(fontSize: 12, color: Cores.texto2)),
           ),
           Text(turno.fcv == null ? '—' : fmtPercentual(turno.fcv!), style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
         ]),

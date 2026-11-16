@@ -117,12 +117,12 @@ class _LinhasPageState extends State<LinhasPage> {
                 width: 200,
                 child: TextField(
                   key: const Key('busca-linha'),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     isDense: true,
-                    prefixIcon: Icon(Icons.search, size: 18),
+                    prefixIcon: const Icon(Icons.search, size: 18),
                     hintText: 'Buscar linha',
                     border: OutlineInputBorder(borderSide: BorderSide(color: Cores.linha)),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   ),
                   onChanged: (v) => setState(() => _busca = v),
                 ),
@@ -246,7 +246,7 @@ class _LinhaDetalheState extends State<LinhaDetalhe> {
                       onPressed: widget.onVoltar,
                       icon: const Icon(Icons.arrow_back, size: 16),
                       label: const Text('Voltar às linhas'),
-                      style: OutlinedButton.styleFrom(foregroundColor: Cores.tinta, side: const BorderSide(color: Cores.linha), visualDensity: VisualDensity.compact),
+                      style: OutlinedButton.styleFrom(foregroundColor: Cores.tinta, side: BorderSide(color: Cores.linha), visualDensity: VisualDensity.compact),
                     ),
                 ],
               ),
@@ -333,7 +333,7 @@ class _LinhaDetalheState extends State<LinhaDetalhe> {
             ? const AvisoSemDados(texto: 'Sem o relatório de partidas por faixa horária no período')
             : GraficoColunas(
                 rotulos: [for (final x in faixas) '${x.faixa.toString().padLeft(2, '0')}h'],
-                series: [SerieColunas(nome: 'Viagens', valores: [for (final x in faixas) x.viagens.toDouble()], cor: Cores.navy)],
+                series: [SerieColunas(nome: 'Viagens', valores: [for (final x in faixas) x.viagens.toDouble()], cor: Cores.destaque)],
                 altura: 200,
               ),
       ),
@@ -355,8 +355,8 @@ class TabelaOcorrencias extends StatelessWidget {
 
   final List<Ocorrencia> ocorrencias;
 
-  static const _cabecalho = TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 0.8, color: Cores.texto2);
-  static const _celula = TextStyle(fontSize: 13, color: Cores.tinta);
+  static TextStyle get _cabecalho => TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, letterSpacing: 0.8, color: Cores.texto2);
+  static TextStyle get _celula => TextStyle(fontSize: 13, color: Cores.tinta);
 
   static String _hora(DateTime? d) => d == null ? '—' : DateFormat('HH:mm').format(d);
 

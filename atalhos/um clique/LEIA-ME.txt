@@ -1,0 +1,15 @@
+Atalhos de um clique
+====================
+
+Sobem a API e o app juntos. Precisam do Python, do Flutter e do backend/.env
+configurado (o atalho avisa se faltar).
+
+  abrir no navegador  ->  abre o DashMOB no navegador deste computador
+  abrir no celular    ->  mostra um QR code pra abrir o DashMOB no celular
+                          (celular e computador na MESMA rede Wi-Fi; no Chrome do
+                          celular dá pra "Adicionar à tela de início")
+
+Mac: pasta mac/, clique duas vezes no .command.
+Windows: pasta windows/, clique duas vezes no .bat (a API abre numa segunda janela).
+
+Pra encerrar, feche a janela (no Windows, as duas).

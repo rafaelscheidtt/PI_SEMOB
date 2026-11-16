@@ -5,7 +5,8 @@ from pymongo.database import Database
 
 from app.db import get_db
 from app.repositories.operacao import listar_linhas, listar_ocorrencias, resumo_por_linha
-from app.schemas import DetalhesOperacao, Linha, Ocorrencia, RespostaIndicadores, ResumoLinha
+from app.schemas import DetalhesOperacao, Linha, Ocorrencia, RespostaFinanceiro, RespostaIndicadores, ResumoLinha
+from app.services.financeiro import obter_financeiro
 from app.services.indicadores import detalhar_operacao, obter_indicadores
 from app.services.periodo import validar_intervalo
 
@@ -34,6 +35,22 @@ def indicadores_por_linha(inicio: date, fim: date, db: Database = Depends(get_db
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return resumo_por_linha(db, inicio, fim)
+
+
+@router.get("/indicadores/financeiro", response_model=RespostaFinanceiro)
+def indicadores_financeiros(
+    inicio: date,
+    fim: date,
+    granularidade: str = Query("dia", pattern="^(dia|semana|mes)$"),
+    comparar: bool = False,
+    db: Database = Depends(get_db),
+):
+    """Vendas, utilização, crédito circulante e saldo de créditos por período (US07).
+    A bilhetagem é do sistema inteiro, por isso não há filtro por linha."""
+    try:
+        return obter_financeiro(db, inicio, fim, granularidade, comparar)
+    except ValueError as exc:  # RN07
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/indicadores/detalhes", response_model=DetalhesOperacao)

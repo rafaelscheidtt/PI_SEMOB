@@ -381,3 +381,251 @@ class ArquivoEnvio {
   final String nome;
   final List<int> bytes;
 }
+
+/// Papel do usuário (US11): define o que aparece no menu e o que a API permite.
+enum Papel {
+  administrador('administrador', 'Administrador', 'Tudo, mais o cadastro de usuários'),
+  gestor('gestor', 'Gestor', 'Painel completo e importação de relatórios'),
+  executivo('executivo', 'Executivo', 'Visão executiva e as telas de indicadores, sem importação e sem cadastro');
+
+  const Papel(this.valorApi, this.rotulo, this.descricao);
+  final String valorApi;
+  final String rotulo;
+  final String descricao;
+
+  static Papel daApi(String? v) => values.firstWhere((p) => p.valorApi == v, orElse: () => executivo);
+}
+
+/// Usuário do painel (GET /me, GET /usuarios).
+class Usuario {
+  const Usuario({required this.id, required this.nome, required this.email, required this.papel, this.ativo = true, this.foto, this.termoPendente = false});
+
+  final String id;
+  final String nome;
+  final String email;
+  final Papel papel;
+  final bool ativo;
+
+  /// Foto do perfil como data URL ("data:image/png;base64,..."); `null` para quem não pôs foto.
+  final String? foto;
+
+  /// Falta ler e aceitar a versão atual do termo de uso e aviso de privacidade (LGPD).
+  final bool termoPendente;
+
+  /// Primeira letra do primeiro e do último nome ("Ana Maria Admin" -> "AA"), para o avatar sem foto.
+  String get iniciais {
+    final partes = nome.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    if (partes.isEmpty) return '?';
+    final primeira = partes.first.substring(0, 1);
+    return (partes.length == 1 ? primeira : primeira + partes.last.substring(0, 1)).toUpperCase();
+  }
+
+  factory Usuario.fromJson(Map<String, dynamic> j) => Usuario(
+        id: (j['_id'] ?? j['id'] ?? '') as String,
+        nome: (j['nome'] ?? '') as String,
+        email: (j['email'] ?? '') as String,
+        papel: Papel.daApi(j['papel'] as String?),
+        ativo: (j['ativo'] as bool?) ?? true,
+        foto: (j['foto'] as String?)?.isEmpty ?? true ? null : j['foto'] as String,
+        termoPendente: (j['termo_pendente'] as bool?) ?? false,
+      );
+}
+
+/// Resposta do POST /login: o token que vai no cabeçalho das próximas chamadas e quem entrou.
+class Sessao {
+  const Sessao({required this.token, required this.usuario});
+
+  final String token;
+  final Usuario usuario;
+
+  factory Sessao.fromJson(Map<String, dynamic> j) => Sessao(
+        token: j['token'] as String,
+        usuario: Usuario.fromJson(j['usuario'] as Map<String, dynamic>),
+      );
+}
+
+/// Um período da série financeira (GET /indicadores/financeiro), valores em reais.
+class PontoFinanceiro {
+  const PontoFinanceiro({
+    required this.periodo,
+    required this.vendas,
+    required this.utilizacao,
+    required this.creditoCirculante,
+    required this.creditosTransferidos,
+    this.saldoFinal,
+    this.diasComDados = 0,
+  });
+
+  final String periodo;
+  final double vendas;
+  final double utilizacao;
+  final double creditoCirculante;
+  final double creditosTransferidos;
+  final double? saldoFinal;
+  final int diasComDados;
+
+  factory PontoFinanceiro.fromJson(Map<String, dynamic> j) => PontoFinanceiro(
+        periodo: j['periodo'] as String,
+        vendas: (j['vendas'] as num).toDouble(),
+        utilizacao: (j['utilizacao'] as num).toDouble(),
+        creditoCirculante: (j['credito_circulante'] as num).toDouble(),
+        creditosTransferidos: (j['creditos_transferidos'] as num).toDouble(),
+        saldoFinal: (j['saldo_final'] as num?)?.toDouble(),
+        diasComDados: (j['dias_com_dados'] as int?) ?? 0,
+      );
+}
+
+/// Totais financeiros do período (US07).
+class TotaisFinanceiro {
+  const TotaisFinanceiro({
+    required this.vendas,
+    required this.utilizacao,
+    required this.creditoCirculante,
+    required this.creditosTransferidos,
+    this.saldoFinal,
+    this.vendasPorDia,
+    this.utilizacaoPorDia,
+    this.diasComDados = 0,
+  });
+
+  final double vendas;
+  final double utilizacao;
+  final double creditoCirculante;
+  final double creditosTransferidos;
+  final double? saldoFinal;
+  final double? vendasPorDia;
+  final double? utilizacaoPorDia;
+  final int diasComDados;
+
+  factory TotaisFinanceiro.fromJson(Map<String, dynamic> j) => TotaisFinanceiro(
+        vendas: (j['vendas'] as num).toDouble(),
+        utilizacao: (j['utilizacao'] as num).toDouble(),
+        creditoCirculante: (j['credito_circulante'] as num).toDouble(),
+        creditosTransferidos: (j['creditos_transferidos'] as num).toDouble(),
+        saldoFinal: (j['saldo_final'] as num?)?.toDouble(),
+        vendasPorDia: (j['vendas_por_dia'] as num?)?.toDouble(),
+        utilizacaoPorDia: (j['utilizacao_por_dia'] as num?)?.toDouble(),
+        diasComDados: (j['dias_com_dados'] as int?) ?? 0,
+      );
+}
+
+class FinanceiroAnterior {
+  const FinanceiroAnterior({required this.inicio, required this.fim, required this.totais});
+
+  final DateTime inicio;
+  final DateTime fim;
+  final TotaisFinanceiro totais;
+
+  factory FinanceiroAnterior.fromJson(Map<String, dynamic> j) => FinanceiroAnterior(
+        inicio: DateTime.parse(j['inicio'] as String),
+        fim: DateTime.parse(j['fim'] as String),
+        totais: TotaisFinanceiro.fromJson(j['totais'] as Map<String, dynamic>),
+      );
+}
+
+/// Resposta financeira do período. [inicioBilhetagem] é o primeiro dia com dado financeiro
+/// no banco, para explicar períodos vazios (antes do fim do Tarifa Zero não havia bilhetagem).
+class Financeiro {
+  const Financeiro({required this.semDados, required this.serie, this.totais, this.anterior, this.inicioBilhetagem});
+
+  final bool semDados;
+  final List<PontoFinanceiro> serie;
+  final TotaisFinanceiro? totais;
+  final FinanceiroAnterior? anterior;
+  final DateTime? inicioBilhetagem;
+
+  factory Financeiro.fromJson(Map<String, dynamic> j) => Financeiro(
+        semDados: j['sem_dados'] as bool,
+        serie: (j['serie'] as List).map((e) => PontoFinanceiro.fromJson(e as Map<String, dynamic>)).toList(),
+        totais: j['totais'] == null ? null : TotaisFinanceiro.fromJson(j['totais'] as Map<String, dynamic>),
+        anterior: j['anterior'] == null ? null : FinanceiroAnterior.fromJson(j['anterior'] as Map<String, dynamic>),
+        inicioBilhetagem: _dataHora(j['inicio_bilhetagem']),
+      );
+
+  static const vazio = Financeiro(semDados: true, serie: []);
+}
+
+/// Gravidade de um alerta (US08).
+enum Severidade {
+  aviso('aviso', 'Aviso'),
+  critico('critico', 'Crítico');
+
+  const Severidade(this.valorApi, this.rotulo);
+  final String valorApi;
+  final String rotulo;
+
+  static Severidade daApi(String? v) => v == 'critico' ? critico : aviso;
+}
+
+/// Um dia fora do padrão (GET /alertas): cumprimento baixo, desvio do histórico ou excesso de ocorrências.
+class Alerta {
+  const Alerta({
+    required this.data,
+    required this.tipo,
+    required this.indicador,
+    required this.severidade,
+    required this.valor,
+    required this.mensagem,
+    this.esperado,
+    this.desvio,
+    this.linha,
+  });
+
+  final DateTime data;
+
+  /// `cumprimento`, `historico` ou `ocorrencias`.
+  final String tipo;
+
+  /// `fcv`, `km_total`, `viagens_realizadas`, `passageiros_total` ou `ocorrencias`.
+  final String indicador;
+  final Severidade severidade;
+  final double valor;
+  final double? esperado;
+  final double? desvio;
+  final String mensagem;
+  final String? linha;
+
+  factory Alerta.fromJson(Map<String, dynamic> j) => Alerta(
+        data: DateTime.parse(j['data'] as String),
+        tipo: (j['tipo'] ?? '') as String,
+        indicador: (j['indicador'] ?? '') as String,
+        severidade: Severidade.daApi(j['severidade'] as String?),
+        valor: (j['valor'] as num).toDouble(),
+        esperado: (j['esperado'] as num?)?.toDouble(),
+        desvio: (j['desvio'] as num?)?.toDouble(),
+        mensagem: (j['mensagem'] ?? '') as String,
+        linha: j['linha'] as String?,
+      );
+
+  /// Nome do tipo para a tela ("Cumprimento", "Padrão histórico", "Ocorrências").
+  String get tipoRotulo => switch (tipo) {
+        'cumprimento' => 'Cumprimento',
+        'historico' => 'Padrão histórico',
+        'ocorrencias' => 'Ocorrências',
+        _ => tipo,
+      };
+}
+
+/// Resposta do GET /alertas.
+class Alertas {
+  const Alertas({required this.total, required this.criticos, required this.avisos, required this.alertas, this.linha});
+
+  final int total;
+  final int criticos;
+  final int avisos;
+  final List<Alerta> alertas;
+  final String? linha;
+
+  factory Alertas.fromJson(Map<String, dynamic> j) => Alertas(
+        total: (j['total'] as int?) ?? 0,
+        criticos: (j['criticos'] as int?) ?? 0,
+        avisos: (j['avisos'] as int?) ?? 0,
+        alertas: (j['alertas'] as List).map((e) => Alerta.fromJson(e as Map<String, dynamic>)).toList(),
+        linha: j['linha'] as String?,
+      );
+
+  static const vazio = Alertas(total: 0, criticos: 0, avisos: 0, alertas: []);
+
+  /// Quantos dias diferentes têm pelo menos um alerta.
+  int get diasComAlerta => alertas.map((a) => a.data).toSet().length;
+}
