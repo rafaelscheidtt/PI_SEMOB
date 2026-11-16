@@ -104,9 +104,10 @@ class _ImportacaoPageState extends State<ImportacaoPage> {
             child: Container(
               padding: const EdgeInsets.all(30),
               decoration: BoxDecoration(
-                color: const Color(0xFFFAFBFD),
+                // cores da paleta, para a caixa acompanhar o modo escuro
+                color: Cores.fundo,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFC7CBDA), width: 2),
+                border: Border.all(color: Cores.linha, width: 2),
               ),
               child: Column(children: [
                 Icon(Icons.upload_file_outlined, size: 32, color: Cores.texto2),

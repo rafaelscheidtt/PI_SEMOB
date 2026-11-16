@@ -273,13 +273,7 @@ class _Logo extends StatelessWidget {
               opacity: opacidade,
               child: Row(children: [
                 Container(width: 1, height: 36, margin: const EdgeInsets.symmetric(horizontal: 12), color: Colors.white.withValues(alpha: 0.18)),
-                const Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    MarcaDashMob(tamanho: 19),
-                    SizedBox(height: 6),
-                    Text('SEMOB · São Caetano do Sul', style: TextStyle(color: Color(0xFF9EA2C7), fontSize: 10.5), maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
-                  ]),
-                ),
+                const Expanded(child: Align(alignment: Alignment.centerLeft, child: MarcaDashMob(tamanho: 22))),
               ]),
             ),
           ),
